@@ -28,6 +28,7 @@ export const StaffListView: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   
   // New Staff Form State
   const [newStaff, setNewStaff] = useState({
@@ -38,7 +39,7 @@ export const StaffListView: React.FC = () => {
     schedule: 'Mon-Fri, 09:00-17:00'
   });
 
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = viewMode === 'list' ? 5 : 6;
 
   // Filter staff based on search query
   const filteredStaff = useMemo(() => {
@@ -55,7 +56,7 @@ export const StaffListView: React.FC = () => {
   const paginatedStaff = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredStaff.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredStaff, currentPage]);
+  }, [filteredStaff, currentPage, viewMode]);
 
   const handlePrevPage = () => {
     setCurrentPage(prev => Math.max(prev - 1, 1));
@@ -134,71 +135,148 @@ export const StaffListView: React.FC = () => {
             >
               <UserPlus size={14} /> Add Staff
             </button>
+            
+            {/* View Toggle Buttons */}
             <div className="flex bg-slate-100 p-1 rounded-lg">
-                <button className="p-1.5 rounded-md text-slate-400 hover:text-slate-600">
+                <button 
+                  onClick={() => { setViewMode('grid'); setCurrentPage(1); }}
+                  className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-emerald-500 shadow-sm border border-emerald-500/10' : 'text-slate-400 hover:text-slate-600'}`}
+                >
                     <LayoutGrid size={16} />
                 </button>
-                <button className="p-1.5 rounded-md bg-white text-slate-800 shadow-sm">
+                <button 
+                  onClick={() => { setViewMode('list'); setCurrentPage(1); }}
+                  className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-emerald-500 shadow-sm border border-emerald-500/10' : 'text-slate-400 hover:text-slate-600'}`}
+                >
                     <List size={16} />
                 </button>
             </div>
+
              <button className="p-2 border border-slate-200 rounded-lg text-slate-400 hover:bg-slate-50 transition-colors">
                 <Settings size={18} />
              </button>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/30">
-                <th className="px-6 py-4 w-10">
-                  <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Staff Member</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Role & Dept</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Contact</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Schedule</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {paginatedStaff.length > 0 ? paginatedStaff.map((member) => (
-                <tr key={member.id} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="px-6 py-4">
-                    <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
-                  </td>
-                  <td className="px-6 py-4">
+        {/* Dynamic Content: List or Grid */}
+        <div className="flex-1">
+          {viewMode === 'list' ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/30">
+                    <th className="px-6 py-4 w-10">
+                      <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
+                    </th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Staff Member</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Role & Dept</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Contact</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Schedule</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {paginatedStaff.length > 0 ? paginatedStaff.map((member) => (
+                    <tr key={member.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <img src={member.avatar} alt={member.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100 shadow-sm" />
+                          <div>
+                            <span className="text-sm font-semibold text-slate-800 block">{member.name}</span>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">ID: {member.id}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-0.5">
+                          <span className="text-sm font-medium text-slate-700 block">{member.role}</span>
+                          <span className="text-xs text-slate-400">{member.department}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                          <Mail size={14} className="text-slate-300" />
+                          {member.email}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                          <Clock size={14} className="text-slate-300" />
+                          {member.schedule}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                          member.status === StaffStatus.Active ? 'bg-emerald-50 text-emerald-600' :
+                          member.status === StaffStatus.OnBreak ? 'bg-amber-50 text-amber-600' :
+                          'bg-slate-50 text-slate-500'
+                        }`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${
+                            member.status === StaffStatus.Active ? 'bg-emerald-500' :
+                            member.status === StaffStatus.OnBreak ? 'bg-amber-500' :
+                            'bg-slate-400'
+                          }`} />
+                          {member.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button className="text-slate-400 hover:text-emerald-600 p-1.5 rounded-lg hover:bg-emerald-50 transition-all">
+                          <MoreHorizontal size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-slate-400 text-sm italic">
+                        No staff members found matching your search.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+              {paginatedStaff.map((member) => (
+                <div key={member.id} className="bg-slate-50/50 border border-slate-200 rounded-2xl p-5 hover:border-emerald-300 transition-all hover:shadow-md group relative">
+                  <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <img src={member.avatar} alt={member.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-100 shadow-sm" />
+                      <img src={member.avatar} alt={member.name} className="w-14 h-14 rounded-2xl object-cover ring-2 ring-white shadow-sm" />
                       <div>
-                        <span className="text-sm font-semibold text-slate-800 block">{member.name}</span>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">ID: {member.id}</span>
+                        <h4 className="font-bold text-slate-800">{member.name}</h4>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">ID: {member.id}</p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="space-y-0.5">
-                      <span className="text-sm font-medium text-slate-700 block">{member.role}</span>
-                      <span className="text-xs text-slate-400">{member.department}</span>
+                    <button className="text-slate-400 hover:text-slate-600 p-1.5">
+                      <MoreHorizontal size={18} />
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400 font-medium">Role</span>
+                      <span className="text-slate-700 font-bold">{member.role}</span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                      <Mail size={14} className="text-slate-300" />
-                      {member.email}
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400 font-medium">Department</span>
+                      <span className="text-slate-700 font-bold">{member.department}</span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                      <Clock size={14} className="text-slate-300" />
-                      {member.schedule}
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400 font-medium">Email</span>
+                      <span className="text-slate-700 font-bold truncate ml-4">{member.email}</span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400 font-medium whitespace-nowrap">Schedule</span>
+                      <span className="text-slate-700 font-bold text-right">{member.schedule}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold ${
                       member.status === StaffStatus.Active ? 'bg-emerald-50 text-emerald-600' :
                       member.status === StaffStatus.OnBreak ? 'bg-amber-50 text-amber-600' :
                       'bg-slate-50 text-slate-500'
@@ -210,25 +288,17 @@ export const StaffListView: React.FC = () => {
                       }`} />
                       {member.status}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-slate-400 hover:text-emerald-600 p-1.5 rounded-lg hover:bg-emerald-50 transition-all">
-                      <MoreHorizontal size={18} />
+                    <button className="text-xs font-bold text-emerald-600 hover:underline">
+                      View Schedule
                     </button>
-                  </td>
-                </tr>
-              )) : (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-400 text-sm italic">
-                    No staff members found matching your search.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Footer with active pagination */}
+        {/* Footer with pagination */}
         <div className="p-6 border-t border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
              <button 
@@ -245,10 +315,10 @@ export const StaffListView: React.FC = () => {
                     <button 
                       key={p} 
                       onClick={() => setCurrentPage(p)}
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all ${
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-all border ${
                         p === currentPage 
-                          ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-200' 
-                          : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                          ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-200' 
+                          : 'text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       {p}
@@ -267,7 +337,7 @@ export const StaffListView: React.FC = () => {
           </div>
           <div className="flex items-center gap-4">
              <span className="text-sm text-slate-500">
-               Showing {Math.min(filteredStaff.length, (currentPage - 1) * ITEMS_PER_PAGE + 1)} to {Math.min(filteredStaff.length, currentPage * ITEMS_PER_PAGE)} of {filteredStaff.length} members
+               Showing {filteredStaff.length > 0 ? Math.min(filteredStaff.length, (currentPage - 1) * ITEMS_PER_PAGE + 1) : 0} to {Math.min(filteredStaff.length, currentPage * ITEMS_PER_PAGE)} of {filteredStaff.length} members
              </span>
           </div>
         </div>
