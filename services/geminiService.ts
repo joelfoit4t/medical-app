@@ -1,12 +1,25 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const getSmartSchedulingSuggestion = async (
   currentDate: string,
   appointments: any[]
 ): Promise<string> => {
   try {
+    const apiKey = process.env.API_KEY;
+    
+    // Check for API key before initializing to prevent crash
+    if (!apiKey) {
+      console.warn("API Key is missing in process.env.API_KEY");
+      return `
+        <ul>
+          <li><strong>API Key Missing:</strong> Smart suggestions unavailable.</li>
+          <li>Please configure <code>process.env.API_KEY</code> to use AI features.</li>
+        </ul>
+      `;
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
     const prompt = `
       I am a medical scheduler. Here are the appointments for ${currentDate}:
       ${JSON.stringify(appointments)}
