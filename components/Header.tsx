@@ -1,5 +1,13 @@
-import React from 'react';
-import { Search, Bell, ChevronDown, Menu } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  Search, 
+  Bell, 
+  ChevronDown, 
+  Menu, 
+  User, 
+  Settings, 
+  LogOut
+} from 'lucide-react';
 import { NavItem } from '../types';
 
 interface Props {
@@ -8,7 +16,25 @@ interface Props {
 }
 
 export const Header: React.FC<Props> = ({ activeNav, onMenuClick }) => {
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
   const subtitle = activeNav === 'Patient' ? 'All Patient Information in One Place' : 'Stay on Top of Your Schedule';
+
+  // Handle clicking outside the dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const menuItems = [
+    { icon: User, label: 'My Profile', description: 'View and edit profile' },
+    { icon: Settings, label: 'Account Settings', description: 'Preferences & Security' },
+  ];
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 fixed top-0 right-0 left-0 lg:left-64 z-10 transition-all">
@@ -35,22 +61,71 @@ export const Header: React.FC<Props> = ({ activeNav, onMenuClick }) => {
           />
         </div>
 
-        <button className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 relative shrink-0">
-          <Bell size={18} />
+        <button className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 relative shrink-0 group">
+          <Bell size={18} className="group-hover:text-emerald-500 transition-colors" />
           <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
         </button>
 
-        <div className="flex items-center gap-3 pl-2 sm:border-l border-slate-200">
-          <img 
-            src="https://picsum.photos/id/64/100/100" 
-            alt="Dr. Clara" 
-            className="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0"
-          />
-          <div className="hidden md:block text-right">
-            <h4 className="text-sm font-bold text-slate-800">Dr. Clara Redfield</h4>
-            <p className="text-xs text-slate-500">clara.redfield@gmail.com</p>
+        {/* Profile Dropdown Container */}
+        <div className="relative" ref={profileRef}>
+          <div 
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className="flex items-center gap-3 pl-2 sm:border-l border-slate-200 cursor-pointer group"
+          >
+            <img 
+              src="https://picsum.photos/id/64/100/100" 
+              alt="Dr. Clara" 
+              className="w-10 h-10 rounded-full object-cover border-2 border-transparent group-hover:border-emerald-500 transition-all shrink-0"
+            />
+            <div className="hidden md:block text-right select-none">
+              <h4 className="text-sm font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Dr. Clara Redfield</h4>
+              <p className="text-[10px] text-slate-500 font-medium">clara.redfield@gmail.com</p>
+            </div>
+            <ChevronDown 
+              size={16} 
+              className={`text-slate-400 group-hover:text-emerald-500 transition-all duration-300 hidden sm:block ${isProfileOpen ? 'rotate-180' : ''}`} 
+            />
           </div>
-          <ChevronDown size={16} className="text-slate-400 cursor-pointer hidden sm:block" />
+
+          {/* Dropdown Menu */}
+          {isProfileOpen && (
+            <div className="absolute right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-slate-100 py-3 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 z-[100]">
+              <div className="px-5 py-4 border-b border-slate-50 mb-2">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Signed in as</p>
+                <p className="text-sm font-bold text-slate-900">Dr. Clara Redfield</p>
+                <p className="text-xs text-emerald-500 font-medium mt-0.5">Administrator Access</p>
+              </div>
+
+              <div className="px-2 space-y-1">
+                {menuItems.map((item, idx) => (
+                  <button 
+                    key={idx}
+                    className="w-full flex items-center gap-4 px-3 py-2.5 rounded-2xl hover:bg-emerald-50 transition-all group"
+                  >
+                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-emerald-500 transition-colors">
+                      <item.icon size={20} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-bold text-slate-700 group-hover:text-emerald-700">{item.label}</p>
+                      <p className="text-[10px] text-slate-400 font-medium">{item.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-2 pt-2 border-t border-slate-50 px-2">
+                <button className="w-full flex items-center gap-4 px-3 py-3 rounded-2xl hover:bg-red-50 transition-all group">
+                  <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-red-500 transition-colors">
+                    <LogOut size={20} />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-slate-700 group-hover:text-red-700">Logout</p>
+                    <p className="text-[10px] text-slate-400 font-medium">End your session safely</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
