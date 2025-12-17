@@ -37,7 +37,7 @@ export const Header: React.FC<Props> = ({ activeNav, onMenuClick }) => {
   ];
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 fixed top-0 right-0 left-0 lg:left-64 z-10 transition-all">
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 fixed top-0 right-0 left-0 lg:left-64 z-50 transition-all">
       <div className="flex items-center gap-3">
         <button 
           onClick={onMenuClick}
@@ -89,38 +89,42 @@ export const Header: React.FC<Props> = ({ activeNav, onMenuClick }) => {
 
           {/* Dropdown Menu */}
           {isProfileOpen && (
-            <div className="absolute right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-slate-100 py-3 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 z-[100]">
-              <div className="px-5 py-4 border-b border-slate-50 mb-2">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Signed in as</p>
+            <div className="absolute right-0 mt-3 w-72 bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 z-[100]">
+              {/* Header Info */}
+              <div className="px-6 py-5 bg-slate-50/50">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Signed in as</p>
                 <p className="text-sm font-bold text-slate-900">Dr. Clara Redfield</p>
-                <p className="text-xs text-emerald-500 font-medium mt-0.5">Administrator Access</p>
+                <p className="text-xs text-emerald-500 font-bold mt-0.5">Administrator Access</p>
               </div>
 
-              <div className="px-2 space-y-1">
+              {/* Menu Actions (Absolutely NO internal STATUS labels) */}
+              <div className="p-2 space-y-0.5">
                 {menuItems.map((item, idx) => (
                   <button 
                     key={idx}
-                    className="w-full flex items-center gap-4 px-3 py-2.5 rounded-2xl hover:bg-emerald-50 transition-all group"
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-emerald-50 transition-all group text-left"
                   >
-                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-emerald-500 transition-colors">
+                    <div className="w-10 h-10 bg-slate-100/50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-emerald-500 transition-colors shrink-0">
                       <item.icon size={20} />
                     </div>
-                    <div className="text-left">
-                      <p className="text-sm font-bold text-slate-700 group-hover:text-emerald-700">{item.label}</p>
-                      <p className="text-[10px] text-slate-400 font-medium">{item.description}</p>
+                    <div>
+                      <p className="text-sm font-bold text-slate-700 group-hover:text-emerald-700 leading-tight">{item.label}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">{item.description}</p>
                     </div>
                   </button>
                 ))}
-              </div>
-
-              <div className="mt-2 pt-2 border-t border-slate-50 px-2">
-                <button className="w-full flex items-center gap-4 px-3 py-3 rounded-2xl hover:bg-red-50 transition-all group">
-                  <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-red-500 transition-colors">
+                
+                {/* Separator */}
+                <div className="h-px bg-slate-100 mx-4 my-1" />
+                
+                {/* Logout Button */}
+                <button className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-50 transition-all group text-left">
+                  <div className="w-10 h-10 bg-slate-100/50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-red-500 transition-colors shrink-0">
                     <LogOut size={20} />
                   </div>
-                  <div className="text-left">
-                    <p className="text-sm font-bold text-slate-700 group-hover:text-red-700">Logout</p>
-                    <p className="text-[10px] text-slate-400 font-medium">End your session safely</p>
+                  <div>
+                    <p className="text-sm font-bold text-slate-700 group-hover:text-red-700 leading-tight">Logout</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">End session safely</p>
                   </div>
                 </button>
               </div>
