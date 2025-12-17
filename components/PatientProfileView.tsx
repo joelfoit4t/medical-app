@@ -41,9 +41,9 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
       <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4 sticky top-0 z-20">
         <button 
           onClick={onBack}
-          className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 border border-slate-200 transition-all active:scale-95"
+          className="p-2 hover:bg-emerald-50 rounded-lg text-slate-400 border border-slate-200 transition-all active:scale-95 group"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={18} className="group-hover:text-emerald-500 transition-colors" />
         </button>
         <div className="flex items-center gap-2 text-sm font-medium">
           <span className="text-slate-400">Patient data</span>
@@ -61,7 +61,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
               onClick={() => setActiveTab(tab)}
               className={`py-4 text-sm font-semibold whitespace-nowrap transition-all border-b-2 ${
                 activeTab === tab 
-                  ? 'border-blue-500 text-blue-600' 
+                  ? 'border-emerald-500 text-emerald-600' 
                   : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}
             >
@@ -80,7 +80,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-8">
             <div className="flex items-start justify-between">
               <div className="flex gap-4">
-                <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 border border-blue-100">
+                <div className="w-14 h-14 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 border border-emerald-100">
                   <span className="text-2xl">{selectedPatient.gender === 'Male' ? '♂' : '♀'}</span>
                 </div>
                 <div>
@@ -97,13 +97,13 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="w-10 h-10 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-all">
+                <button className="w-10 h-10 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-500 transition-all">
                   <Phone size={18} />
                 </button>
-                <button className="w-10 h-10 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-all">
+                <button className="w-10 h-10 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-500 transition-all">
                   <MessageSquare size={18} />
                 </button>
-                <button className="w-10 h-10 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-all">
+                <button className="w-10 h-10 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-500 transition-all">
                   <FileText size={18} />
                 </button>
               </div>
@@ -133,7 +133,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-6 flex items-center justify-between border-b border-slate-100">
               <h3 className="font-bold text-slate-800 text-lg">Care plans</h3>
-              <button className="text-blue-500 text-sm font-bold flex items-center gap-1 hover:underline transition-all">
+              <button className="text-emerald-500 text-sm font-bold flex items-center gap-1 hover:underline transition-all">
                 View all <ArrowRight size={14} />
               </button>
             </div>
@@ -177,7 +177,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-6 flex items-center justify-between border-b border-slate-100">
               <h3 className="font-bold text-slate-800 text-lg">Medications</h3>
-              <button className="text-blue-500 text-sm font-bold flex items-center gap-1 hover:underline transition-all">
+              <button className="text-emerald-500 text-sm font-bold flex items-center gap-1 hover:underline transition-all">
                 View all <ArrowRight size={14} />
               </button>
             </div>
@@ -214,7 +214,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                       <td className="px-6 py-5 text-sm font-medium text-slate-600">{row.amount}</td>
                       <td className="px-6 py-5 text-sm font-medium text-slate-600">{row.end}</td>
                       <td className="px-6 py-5 text-center">
-                        <button className="text-slate-300 hover:text-slate-500 transition-colors">
+                        <button className="text-slate-300 hover:text-emerald-500 transition-colors">
                           <MoreHorizontal size={18} />
                         </button>
                       </td>
@@ -233,7 +233,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-slate-800 text-lg">Timeline</h3>
-              <button className="text-blue-500 text-sm font-bold flex items-center gap-1 hover:underline transition-all">
+              <button className="text-emerald-500 text-sm font-bold flex items-center gap-1 hover:underline transition-all">
                 View all <ArrowRight size={14} />
               </button>
             </div>
@@ -245,7 +245,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                 
                 {/* Expanded Timeline Card */}
                 <div className="relative pl-8">
-                  <div className="absolute left-[3px] top-1.5 w-3 h-3 rounded-full border-2 border-blue-500 bg-white shadow-sm z-10"></div>
+                  <div className="absolute left-[3px] top-1.5 w-3 h-3 rounded-full border-2 border-emerald-500 bg-white shadow-sm z-10"></div>
                   <div className="absolute left-[8px] top-6 bottom-[-24px] w-[1px] bg-slate-100 border-l border-dashed border-slate-300"></div>
                   
                   <div className="flex items-center justify-between mb-2">
@@ -313,7 +313,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
               <button className="w-full flex items-center justify-center gap-3 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition-all shadow-lg shadow-slate-200 active:scale-[0.98]">
                 <Plus size={18} /> Add New Entry
               </button>
-              <button className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all active:scale-[0.98]">
+              <button className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-emerald-50 hover:text-emerald-600 transition-all active:scale-[0.98]">
                 <ExternalLink size={18} /> Referral Center
               </button>
             </div>

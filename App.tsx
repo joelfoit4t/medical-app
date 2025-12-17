@@ -79,7 +79,7 @@ function App() {
       case 'Dashboard':
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 h-[calc(100vh-64px)]">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 text-slate-300">
+                <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4 text-emerald-500 shadow-sm border border-emerald-100">
                   <span className="text-3xl">📊</span>
                 </div>
                 <h2 className="text-lg font-bold text-slate-800 mb-1">Dashboard</h2>
@@ -89,7 +89,7 @@ function App() {
       default:
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 capitalize h-[calc(100vh-64px)]">
-                <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 text-slate-300 text-3xl">
+                <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4 text-emerald-500 shadow-sm border border-emerald-100 text-3xl">
                   {activeNav === 'Report' ? '📝' : activeNav === 'Clinic' ? '🏥' : '💬'}
                 </div>
                 <h2 className="text-lg font-bold text-slate-800 mb-1">{activeNav}</h2>

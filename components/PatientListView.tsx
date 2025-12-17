@@ -120,7 +120,6 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
   const handleDeletePatient = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    // Directly update the state to ensure removal works instantly
     setPatients(prev => prev.filter(p => p.id !== id));
     setActiveMenuId(null);
   };
@@ -142,6 +141,38 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
         return null;
     }
   };
+
+  const renderActionMenu = (patient: Patient) => (
+    <div 
+      ref={menuRef}
+      className="absolute right-0 top-12 w-64 bg-white rounded-[2rem] shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 text-left"
+    >
+      <div className="py-2">
+        <button 
+          onClick={(e) => handleEditClick(e, patient)} 
+          className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+        >
+          <Pencil size={20} className="text-[#10b981]" /> Edit Patient
+        </button>
+        <button 
+          onClick={(e) => handleViewProfileClick(e, patient.id)} 
+          className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+        >
+          <Users size={20} className="text-[#10b981]" /> View Profile
+        </button>
+        <div className="h-px bg-slate-50 mx-6" />
+        <div className="p-3">
+          <button 
+            onClick={(e) => handleDeletePatient(e, patient.id)} 
+            className="w-full flex flex-col items-center justify-center gap-3 p-5 rounded-[1.5rem] border-[3px] border-[#fca5a5] bg-[#fff1f2] hover:bg-red-50 text-red-600 transition-all active:scale-[0.98] group"
+          >
+            <Trash2 size={32} className="text-red-500 group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-center">Remove Record</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -296,37 +327,7 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
                         >
                           <MoreHorizontal size={18} />
                         </button>
-                        {activeMenuId === patient.id && (
-                          <div 
-                            ref={menuRef}
-                            className="absolute right-10 top-14 w-64 bg-white rounded-[2rem] shadow-2xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 text-left"
-                          >
-                            <div className="py-2">
-                              <button 
-                                onClick={(e) => handleEditClick(e, patient)} 
-                                className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
-                              >
-                                <Pencil size={20} className="text-[#10b981]" /> Edit Patient
-                              </button>
-                              <button 
-                                onClick={(e) => handleViewProfileClick(e, patient.id)} 
-                                className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
-                              >
-                                <Users size={20} className="text-[#10b981]" /> View Profile
-                              </button>
-                              <div className="h-px bg-slate-50 mx-6" />
-                              <div className="p-3">
-                                <button 
-                                  onClick={(e) => handleDeletePatient(e, patient.id)} 
-                                  className="w-full flex flex-col items-center justify-center gap-3 p-5 rounded-[1.5rem] border-[3px] border-[#fca5a5] bg-[#fff1f2] hover:bg-red-50 text-red-600 transition-all active:scale-[0.98] group"
-                                >
-                                  <Trash2 size={32} className="text-red-500 group-hover:scale-110 transition-transform" />
-                                  <span className="text-xs font-black uppercase tracking-[0.2em] text-center">Remove Record</span>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                        {activeMenuId === patient.id && renderActionMenu(patient)}
                       </td>
                     </tr>
                   )) : (
@@ -347,7 +348,7 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 {paginatedPatients.map((patient) => (
-                    <div key={patient.id} className="bg-slate-50/50 border border-slate-200 rounded-2xl p-5 hover:border-emerald-300 transition-all hover:shadow-md group" onClick={() => onViewProfile(patient.id)}>
+                    <div key={patient.id} className="bg-slate-50/50 border border-slate-200 rounded-2xl p-5 hover:border-emerald-300 transition-all hover:shadow-md group cursor-pointer relative" onClick={() => onViewProfile(patient.id)}>
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-3">
                                 <img src={patient.avatar} alt={patient.name} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-white shadow-sm" />
@@ -356,15 +357,22 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
                                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">ID: {patient.id.padStart(4, '0')}</p>
                                 </div>
                             </div>
-                            <button 
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveMenuId(activeMenuId === patient.id ? null : patient.id);
-                                }}
-                                className="text-slate-400 hover:text-slate-600 p-1.5"
-                            >
-                                <MoreHorizontal size={18} />
-                            </button>
+                            <div className="relative">
+                              <button 
+                                  onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveMenuId(activeMenuId === patient.id ? null : patient.id);
+                                  }}
+                                  className={`p-2 rounded-xl border-2 transition-all ${
+                                    activeMenuId === patient.id 
+                                      ? 'border-emerald-500 bg-white text-emerald-500 shadow-md scale-105' 
+                                      : 'border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                                  }`}
+                              >
+                                  <MoreHorizontal size={18} />
+                              </button>
+                              {activeMenuId === patient.id && renderActionMenu(patient)}
+                            </div>
                         </div>
                         <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-xs">

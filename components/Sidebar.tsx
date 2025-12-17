@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SIDEBAR_ITEMS, FAVORITES_ITEMS, BOTTOM_ITEMS } from '../constants';
+import { SIDEBAR_ITEMS } from '../constants';
 import { Plus, X, ChevronDown } from 'lucide-react';
 import { NavItem } from '../types';
 
@@ -49,7 +49,7 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
     >
       <div className="p-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+          <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
             <Plus size={20} strokeWidth={4} />
           </div>
           <span className="text-xl font-bold text-slate-800 tracking-tight">Medicare</span>
@@ -86,7 +86,7 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
                 }}
                 className={`flex w-full items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-white text-slate-900 shadow-[0px_4px_12px_rgba(0,0,0,0.06)] border-2 border-blue-500'
+                    ? 'bg-white text-slate-900 shadow-[0px_4px_12px_rgba(0,0,0,0.06)] border-2 border-emerald-500'
                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 border-2 border-transparent'
                 }`}
               >
@@ -162,35 +162,6 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
           );
         })}
       </nav>
-
-      <div className="px-8 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-        Favorite
-      </div>
-      <nav className="px-4 space-y-1">
-        {FAVORITES_ITEMS.map((item, index) => (
-          <a
-            key={index}
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-          >
-            <item.icon size={20} className="text-slate-400" />
-            {item.label}
-          </a>
-        ))}
-      </nav>
-
-      <div className="mt-auto px-4 pb-4">
-        {BOTTOM_ITEMS.map((item, index) => (
-          <a
-            key={index}
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-          >
-            <item.icon size={20} className="text-slate-400" />
-            {item.label}
-          </a>
-        ))}
-      </div>
     </aside>
   );
 };

@@ -6,12 +6,7 @@ import {
   FileText, 
   Building2, 
   Stethoscope, 
-  FolderHeart, 
-  BriefcaseMedical, 
-  FileBarChart, 
-  MessageSquare, 
-  HelpCircle, 
-  Settings 
+  MessageSquare
 } from 'lucide-react';
 
 export const SIDEBAR_ITEMS = [
@@ -22,18 +17,6 @@ export const SIDEBAR_ITEMS = [
   { icon: Building2, label: 'Clinic' },
   { icon: Stethoscope, label: 'Staff' },
   { icon: MessageSquare, label: 'Consultation' },
-];
-
-export const FAVORITES_ITEMS = [
-  { icon: FolderHeart, label: 'VIP Patient' },
-  { icon: BriefcaseMedical, label: 'Equipment' },
-  { icon: FileBarChart, label: 'Staff Report' },
-];
-
-export const BOTTOM_ITEMS = [
-  { icon: MessageSquare, label: 'Feedback' },
-  { icon: HelpCircle, label: 'Help Center' },
-  { icon: Settings, label: 'Settings' },
 ];
 
 export const MOCK_PATIENTS: Patient[] = [

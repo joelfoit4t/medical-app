@@ -160,8 +160,6 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
   const handleDeleteClick = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    // No window.confirm used in the visual request, but good practice.
-    // However, to match the instant behavior requested, we proceed.
     onDeleteAppointment(id);
     setActiveMenuId(null);
   };
@@ -185,7 +183,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
       case AppointmentStatus.Waiting:
         return <span className={`${baseStyles} bg-amber-50 text-amber-600`}><User size={14} /> Waiting</span>;
       default:
-        return <span className={`${baseStyles} bg-sky-50 text-sky-600`}><Clock size={14} /> Scheduled</span>;
+        return <span className={`${baseStyles} bg-emerald-50 text-emerald-600`}><Clock size={14} /> Scheduled</span>;
     }
   };
 
@@ -197,7 +195,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
           <button 
             onClick={() => setViewType('list')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-              viewType === 'list' ? 'bg-white text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              viewType === 'list' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <List size={16} /> List
@@ -205,7 +203,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
           <button 
             onClick={() => setViewType('calendar')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-              viewType === 'calendar' ? 'bg-white text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              viewType === 'calendar' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <CalendarIcon size={16} /> Calendar
@@ -218,7 +216,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
               <ChevronLeft size={18} />
             </button>
             <div className="relative">
-              <button onClick={() => setShowDatePicker(!showDatePicker)} className="flex items-center gap-2 px-5 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-sm text-slate-700 font-bold whitespace-nowrap hover:border-blue-300 transition-colors">
+              <button onClick={() => setShowDatePicker(!showDatePicker)} className="flex items-center gap-2 px-5 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-sm text-slate-700 font-bold whitespace-nowrap hover:border-emerald-300 transition-colors">
                 {formatDate(currentDate)}
               </button>
               {showDatePicker && (
@@ -228,7 +226,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m, i) => (
-                      <button key={m} onClick={() => selectMonth(i)} className={`py-2 text-xs font-bold rounded-lg transition-all ${currentDate.getMonth() === i ? 'bg-blue-500 text-white' : 'text-slate-600 hover:bg-slate-50'}`}>{m}</button>
+                      <button key={m} onClick={() => selectMonth(i)} className={`py-2 text-xs font-bold rounded-lg transition-all ${currentDate.getMonth() === i ? 'bg-emerald-500 text-white' : 'text-slate-600 hover:bg-slate-50'}`}>{m}</button>
                     ))}
                   </div>
                 </div>
@@ -240,7 +238,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
           </div>
           
           <div className="flex items-center gap-2 order-3 ml-auto xl:ml-0">
-             <button onClick={handleSmartSchedule} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-blue-200 transition-all active:scale-95">
+             <button onClick={handleSmartSchedule} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-emerald-200 transition-all active:scale-95">
                <Sparkles size={16} /> Smart Assist
              </button>
              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 font-bold hover:bg-slate-50 shadow-sm transition-all">
@@ -257,8 +255,8 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
             <div className="grid grid-cols-[80px_1fr_1fr_1fr_1fr_1fr] border-b border-slate-200">
               <div className="p-4 text-[10px] font-bold text-slate-400 uppercase flex items-center justify-center border-r border-slate-100 shrink-0 bg-white sticky left-0 z-30">GMT +7</div>
               {getWeekDays.map((day) => (
-                <div key={day.fullDate} className={`p-4 text-center border-r border-slate-100 last:border-r-0 min-w-[140px] transition-colors ${day.active ? 'bg-sky-50' : 'bg-white'}`}>
-                  <span className={`text-[11px] font-bold block ${day.active ? 'text-sky-500' : 'text-slate-400'}`}>{day.name} {day.date}</span>
+                <div key={day.fullDate} className={`p-4 text-center border-r border-slate-100 last:border-r-0 min-w-[140px] transition-colors ${day.active ? 'bg-emerald-50' : 'bg-white'}`}>
+                  <span className={`text-[11px] font-bold block ${day.active ? 'text-emerald-500' : 'text-slate-400'}`}>{day.name} {day.date}</span>
                 </div>
               ))}
             </div>
@@ -273,7 +271,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                   ))}
                 </div>
                 {getWeekDays.map((day, dayIdx) => (
-                  <div key={day.fullDate} className={`relative border-r border-slate-100 last:border-r-0 min-w-[140px] ${day.active ? 'bg-sky-50/10' : ''}`}>
+                  <div key={day.fullDate} className={`relative border-r border-slate-100 last:border-r-0 min-w-[140px] ${day.active ? 'bg-emerald-50/10' : ''}`}>
                      {TIME_SLOTS.map((_, tIdx) => (<div key={tIdx} className="border-b border-slate-50 h-[160px] w-full"></div>))}
                      {filteredAppointments.filter(apt => apt.date === day.fullDate).map(apt => (
                        <div key={apt.id} className="absolute left-2 right-2 z-10 transition-all hover:z-20 hover:scale-[1.02]" style={getPositionStyle(apt.startTime, apt.endTime)}>
@@ -304,7 +302,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                       <tr key={apt.id} className="hover:bg-slate-50/50 transition-colors group">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 font-bold text-xs border border-blue-100 uppercase">
+                            <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 font-bold text-xs border border-emerald-100 uppercase">
                               {apt.patientName.charAt(0)}
                             </div>
                             <span className="text-sm font-bold text-slate-800">{apt.patientName}</span>
@@ -330,7 +328,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                             }}
                             className={`p-2 rounded-xl border-2 transition-all ${
                               activeMenuId === apt.id 
-                                ? 'border-blue-500 bg-white text-blue-500 shadow-md scale-105' 
+                                ? 'border-emerald-500 bg-white text-emerald-500 shadow-md scale-105' 
                                 : 'border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50'
                             }`}
                           >
@@ -351,10 +349,9 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                                 </button>
                                 <div className="h-px bg-slate-50 mx-6" />
                                 <div className="p-3">
-                                  {/* DELETE APPOINTMENT BOX DESIGN AS PER SCREENSHOT */}
                                   <button 
                                     onClick={(e) => handleDeleteClick(e, apt.id)} 
-                                    className="w-full flex flex-col items-center justify-center gap-3 p-5 rounded-[1.5rem] border-[3px] border-[#2563eb] bg-[#fff1f2] hover:bg-red-50 text-red-600 transition-all active:scale-[0.98] group"
+                                    className="w-full flex flex-col items-center justify-center gap-3 p-5 rounded-[1.5rem] border-[3px] border-[#10b981] bg-[#fff1f2] hover:bg-red-50 text-red-600 transition-all active:scale-[0.98] group"
                                   >
                                     <Trash2 size={32} className="text-red-500 group-hover:scale-110 transition-transform" />
                                     <span className="text-xs font-black uppercase tracking-[0.2em] text-center leading-relaxed">
@@ -385,7 +382,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                           key={p}
                           onClick={() => setCurrentPage(p)}
                           className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all border-2 ${
-                            currentPage === p ? 'border-blue-500 text-blue-600 bg-white shadow-sm' : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-white/50'
+                            currentPage === p ? 'border-emerald-500 text-emerald-600 bg-white shadow-sm' : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-white/50'
                           }`}
                         >{p}</button>
                       ))}
@@ -535,7 +532,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
           <div className="bg-white rounded-3xl shadow-2xl w-[400px] p-8 border border-white/50 animate-in fade-in zoom-in duration-300">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600"><Sparkles size={24} /></div>
+                <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600"><Sparkles size={24} /></div>
                 <div>
                     <h3 className="font-bold text-slate-800">Smart Assistant</h3>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">AI Powered Scheduling</p>
@@ -545,7 +542,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
             </div>
             {aiLoading ? (
                <div className="py-12 flex flex-col items-center gap-4 text-slate-500">
-                 <div className="w-8 h-8 border-[3px] border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                 <div className="w-8 h-8 border-[3px] border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                  <p className="text-sm font-bold animate-pulse">Analyzing schedule...</p>
                </div>
             ) : (
