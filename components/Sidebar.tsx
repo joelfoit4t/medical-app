@@ -52,7 +52,7 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
           <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
             <Plus size={20} strokeWidth={4} />
           </div>
-          <span className="text-xl font-bold text-slate-800 tracking-tight">Medicare</span>
+          <span className="text-xl font-bold text-slate-800 tracking-tight">Siloe Med</span>
         </div>
         <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-slate-600">
           <X size={24} />

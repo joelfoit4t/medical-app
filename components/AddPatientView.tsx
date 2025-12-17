@@ -42,7 +42,7 @@ export const AddPatientView: React.FC<Props> = ({ onAddPatient, onSuccess }) => 
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Register New Patient</h2>
-          <p className="text-slate-500 mt-1">Onboard a new patient into the Medicare medical database.</p>
+          <p className="text-slate-500 mt-1">Onboard a new patient into the Siloe Med medical database.</p>
         </div>
         <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center shadow-sm border border-emerald-100">
           <UserPlus size={32} />
@@ -147,7 +147,7 @@ export const AddPatientView: React.FC<Props> = ({ onAddPatient, onSuccess }) => 
           <div className="bg-emerald-50/50 p-6 rounded-3xl border border-emerald-100 flex items-start gap-4">
              <div className="text-emerald-500 mt-1"><Info size={18} /></div>
              <p className="text-xs text-emerald-600/80 font-medium leading-relaxed">
-               By clicking register, you confirm that the patient has signed the HIPAA disclosure forms and agreed to have their medical data managed by Medicare Systems.
+               By clicking register, you confirm that the patient has signed the HIPAA disclosure forms and agreed to have their medical data managed by Siloe Med Systems.
              </p>
           </div>
 
