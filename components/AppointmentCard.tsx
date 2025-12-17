@@ -7,7 +7,6 @@ interface Props {
 }
 
 export const AppointmentCard: React.FC<Props> = ({ appointment }) => {
-  // Determine styles based on status
   let bgColor = 'bg-white';
   let stripColor = 'bg-slate-400';
   let badgeClass = 'bg-slate-100 text-slate-600';
@@ -41,37 +40,29 @@ export const AppointmentCard: React.FC<Props> = ({ appointment }) => {
       break;
   }
 
-  // Calculate position logic (simplified for this fixed-height demo)
-  // In a real app, calculate "top" based on start time relative to grid start
-  // For the demo visual, we use relative placement or CSS grid placement if strict,
-  // but here we render inside the cell. 
-  
-  // NOTE: In the parent component, we will position this absolutely. 
-  // This component just handles the inner content.
-
   return (
-    <div className={`w-full h-full rounded-lg bg-white shadow-sm border border-slate-100 flex overflow-hidden hover:shadow-md transition-shadow cursor-pointer group`}>
+    <div className={`w-full h-full rounded-xl bg-white shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border border-slate-100 flex overflow-hidden hover:shadow-md transition-shadow cursor-pointer group`}>
       {/* Left Color Strip */}
-      <div className={`w-1 ${stripColor} h-full flex-shrink-0`} />
+      <div className={`w-[3px] ${stripColor} h-full flex-shrink-0`} />
       
       {/* Content */}
-      <div className="p-3 flex flex-col justify-between w-full min-w-0">
-        <div>
-          <div className="text-[10px] text-slate-500 font-medium mb-0.5">
+      <div className="p-3.5 flex flex-col justify-between w-full min-w-0">
+        <div className="space-y-1">
+          <div className="text-[11px] text-slate-400 font-medium">
             {appointment.startTime} - {appointment.endTime}
           </div>
-          <h3 className="text-xs font-bold text-slate-800 truncate leading-tight">
+          <h3 className="text-[13px] font-bold text-slate-800 truncate leading-tight">
             {appointment.patientName}
           </h3>
-          <p className="text-[10px] text-slate-500 truncate mt-0.5">
+          <p className="text-[11px] text-slate-400 truncate">
             {appointment.reason}
           </p>
         </div>
 
         {/* Status Badge */}
-        <div className={`mt-2 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md ${badgeClass} w-full`}>
-          <Icon size={12} strokeWidth={2.5} />
-          <span className="text-[10px] font-semibold whitespace-nowrap">{iconText}</span>
+        <div className={`mt-3 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg ${badgeClass} w-full transition-colors`}>
+          <Icon size={14} strokeWidth={2.5} />
+          <span className="text-[11px] font-bold whitespace-nowrap">{iconText}</span>
         </div>
       </div>
     </div>
