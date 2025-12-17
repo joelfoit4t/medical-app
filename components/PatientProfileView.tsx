@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ArrowLeft, 
   Phone, 
@@ -11,7 +11,14 @@ import {
   ExternalLink,
   ArrowRight,
   Plus,
-  Pill
+  Pill,
+  Search,
+  SlidersHorizontal,
+  MoreHorizontal,
+  Check,
+  Activity,
+  Archive,
+  Menu
 } from 'lucide-react';
 import { Patient } from '../types';
 
@@ -46,11 +53,48 @@ interface Props {
 export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBack }) => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [expandedItems, setExpandedItems] = useState<string[]>(['up-1']);
-  const [showOnlyActive, setShowOnlyActive] = useState(true);
+  
+  // Medication filtering
+  const [medFilter, setMedFilter] = useState<'All' | 'Active' | 'Inactive'>('Active');
+  const [isMedFilterMenuOpen, setIsMedFilterMenuOpen] = useState(false);
+  const medFilterRef = useRef<HTMLDivElement>(null);
 
   const selectedPatient = useMemo(() => {
     return patients.find(p => p.id === selectedId) || patients[0];
   }, [selectedId, patients]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (medFilterRef.current && !medFilterRef.current.contains(event.target as Node)) {
+        setIsMedFilterMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const timelineData: TimelineItem[] = [
+    {
+      id: 'up-1',
+      title: 'Monthly Review',
+      date: '23 May, 2023',
+      problems: 'The patient has a history of high blood pressure and is currently taking medication to manage it. During the most recent visit, the patient complained of occasional headaches and dizziness.',
+      doctor: 'Dr M. Wagner',
+      priority: 'High',
+      caseNo: 'C-2198',
+      type: 'upcoming'
+    },
+    {
+      id: 'pa-1',
+      title: 'General Check-up',
+      date: '21 April, 2023',
+      problems: 'Routine checkup. All vitals stable.',
+      doctor: 'Dr R. Green',
+      priority: 'Normal',
+      caseNo: 'C-2044',
+      type: 'past'
+    }
+  ];
 
   const toggleItem = (id: string) => {
     setExpandedItems(prev => 
@@ -69,31 +113,10 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
   ];
 
   const filteredMedications = useMemo(() => {
-    return showOnlyActive ? medications.filter(m => m.isActive) : medications;
-  }, [showOnlyActive]);
-
-  const timelineData: TimelineItem[] = [
-    { 
-      id: 'up-1', 
-      title: 'Diabetic issue re-check', 
-      date: '24 May, 2023', 
-      problems: 'Urinate often and very hungry from last few days',
-      doctor: 'Dr M. Wagner',
-      priority: 'Medium',
-      caseNo: 'Medex6775',
-      type: 'upcoming'
-    },
-    { 
-      id: 'past-1', 
-      title: 'Radiotherapy', 
-      date: '24 April, 2023',
-      problems: 'Standard follow-up for localized treatment area.',
-      doctor: 'Dr S. Ray',
-      priority: 'High',
-      caseNo: 'Rad9920',
-      type: 'past' 
-    }
-  ];
+    if (medFilter === 'Active') return medications.filter(m => m.isActive);
+    if (medFilter === 'Inactive') return medications.filter(m => !m.isActive);
+    return medications;
+  }, [medFilter]);
 
   const tabs = [
     'Overview', 'Clinical data', 'Medications', 'Care plans', 
@@ -102,59 +125,107 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
 
   const renderMedicationsTab = () => (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 shadow-sm transition-all w-fit">
-          <Plus size={18} className="text-slate-400" /> Update medication
-        </button>
-        
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-slate-500">Show only active medications</span>
-          <button 
-            onClick={() => setShowOnlyActive(!showOnlyActive)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${showOnlyActive ? 'bg-emerald-500' : 'bg-slate-200'}`}
-          >
-            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showOnlyActive ? 'translate-x-6' : 'translate-x-1'}`} />
-          </button>
+          <div className="relative" ref={medFilterRef}>
+            <button 
+              onClick={() => setIsMedFilterMenuOpen(!isMedFilterMenuOpen)}
+              className={`w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 transition-all ${isMedFilterMenuOpen ? 'bg-emerald-50 text-emerald-600 border-emerald-500' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              <SlidersHorizontal size={20} />
+            </button>
+            {isMedFilterMenuOpen && (
+              <div className="absolute left-0 top-12 w-56 bg-white rounded-2xl shadow-2xl border border-slate-200 z-[60] overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-4 py-2 border-b border-slate-200 mb-1">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Medication Status</p>
+                </div>
+                {[
+                  { label: 'All Medications', value: 'All', icon: Menu, color: 'text-slate-400' },
+                  { label: 'Active Only', value: 'Active', icon: Activity, color: 'text-emerald-500' },
+                  { label: 'Inactive Only', value: 'Inactive', icon: Archive, color: 'text-slate-500' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setMedFilter(option.value as any);
+                      setIsMedFilterMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <option.icon size={16} className={option.color} />
+                      {option.label}
+                    </div>
+                    {medFilter === option.value && <Check size={14} className="text-emerald-500" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="h-6 w-px bg-slate-300 mx-1 hidden sm:block"></div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Filtering: {medFilter}</span>
         </div>
+        
+        <button className="flex items-center gap-2 px-6 py-3 bg-[#10b981] text-white rounded-xl text-sm font-bold hover:bg-[#059669] transition-all shadow-lg shadow-emerald-100">
+          <Plus size={18} /> Update medication
+        </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-100">
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Medication Name</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Dosage</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Instructions on how to take</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Prescribed by</th>
-                <th className="px-6 py-5 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Prescr. date</th>
+              <tr className="border-b border-slate-200 bg-slate-50/30">
+                <th className="px-6 py-4 w-10 border-r border-slate-200">
+                  <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
+                </th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">ID</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Medication Name</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Dosage</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Instructions</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Prescribed by</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Prescr. date</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
-              {filteredMedications.map((med) => (
-                <tr key={med.id} className="hover:bg-slate-50/30 transition-colors">
-                  <td className="px-6 py-5">
-                    <p className="text-sm font-bold text-slate-800">{med.name}</p>
-                    <p className="text-xs text-slate-400 font-medium mt-0.5">{med.strength}</p>
+            <tbody className="divide-y divide-slate-200">
+              {filteredMedications.map((med, idx) => (
+                <tr key={med.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <td className="px-6 py-5 border-r border-slate-200">
+                    <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
                   </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3 text-sm font-semibold text-slate-700">
-                      <div className="w-6 h-6 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
-                        <Pill size={12} className="text-emerald-500 rotate-45" />
-                      </div>
+                  <td className="px-6 py-5 text-sm font-medium text-slate-500 border-r border-slate-200">
+                    {idx + 100}-M
+                  </td>
+                  <td className="px-6 py-5 border-r border-slate-200">
+                    <div className="flex flex-col">
+                      <p className="text-sm font-bold text-slate-800">{med.name}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{med.strength}</p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5 border-r border-slate-200 text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-lg text-sm font-bold text-slate-700">
+                      <Pill size={12} className="text-emerald-500 rotate-45" />
                       {med.dosage}
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-sm font-medium text-slate-600">
+                  <td className="px-6 py-5 text-sm font-medium text-slate-600 border-r border-slate-200">
                     {med.instructions}
                   </td>
-                  <td className="px-6 py-5">
-                    <button className="text-sm font-bold text-slate-700 hover:text-emerald-600 hover:underline underline-offset-4 decoration-slate-300">
-                      {med.prescribedBy}
-                    </button>
+                  <td className="px-6 py-5 border-r border-slate-200">
+                    <div className="flex items-center gap-2">
+                      <img src={`https://i.pravatar.cc/150?u=${med.prescribedBy.replace(/\s+/g, '')}`} className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" />
+                      <span className="text-sm font-bold text-slate-700 hover:text-emerald-600 cursor-pointer hover:underline underline-offset-4">{med.prescribedBy}</span>
+                    </div>
                   </td>
-                  <td className="px-6 py-5 text-sm font-semibold text-slate-700">
+                  <td className="px-6 py-5 text-sm font-bold text-slate-700 border-r border-slate-200 text-center">
                     {med.prescrDate}
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                    <button className="p-1 text-slate-400 hover:text-slate-600 transition-colors">
+                      <MoreHorizontal size={20} />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -171,7 +242,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
     return (
       <div key={item.id} className="relative pl-8 mb-6 last:mb-0">
         {!isLast && (
-          <div className="absolute left-[8px] top-6 bottom-[-24px] w-[1px] bg-slate-100 border-l border-dashed border-slate-300"></div>
+          <div className="absolute left-[8px] top-6 bottom-[-24px] w-[1px] bg-slate-200 border-l border-dashed border-slate-300"></div>
         )}
         <div className={`absolute left-[3px] top-1.5 w-3 h-3 rounded-full border-2 bg-white shadow-sm z-10 transition-colors duration-300 ${isExpanded ? 'border-emerald-500' : 'border-slate-300'}`}></div>
         <div className="flex items-center justify-between mb-1">
@@ -181,17 +252,17 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
             </p>
             <p className="text-xs text-slate-400 font-medium mt-1">{item.date}</p>
           </button>
-          <button onClick={() => toggleItem(item.id)} className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${isExpanded ? 'bg-emerald-50 border-emerald-200 text-emerald-500' : 'bg-white border-slate-200 text-slate-400 hover:border-emerald-300 hover:text-emerald-500 shadow-sm'}`}>
+          <button onClick={() => toggleItem(item.id)} className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${isExpanded ? 'bg-emerald-50 border-emerald-300 text-emerald-500' : 'bg-white border-slate-200 text-slate-400 hover:border-emerald-500 hover:text-emerald-500 shadow-sm'}`}>
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
         </div>
         {isExpanded && (
-          <div className="mt-4 bg-[#fcfdfe] border border-emerald-100/50 rounded-2xl p-5 space-y-6 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="mt-4 bg-[#fcfdfe] border border-emerald-100 rounded-2xl p-5 space-y-6 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="space-y-3">
               <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Problems</p>
               <p className="text-xs font-medium text-slate-700 leading-relaxed">{item.problems || 'No specific problems noted for this visit.'}</p>
             </div>
-            <div className="flex justify-between border-t border-slate-50 pt-4">
+            <div className="flex justify-between border-t border-slate-200 pt-4">
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assign. doctor</p>
                 <p className="text-xs font-bold text-slate-800">{item.doctor || 'TBA'}</p>
@@ -247,7 +318,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
             </div>
           </div>
 
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 border-t border-slate-100 pt-8">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 border-t border-slate-200 pt-8">
             {[
               { label: 'Last visits', value: selectedPatient.lastAppointment },
               { label: 'Issue', value: 'Emergency', isBadge: true },
@@ -256,7 +327,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
               { label: 'Next Appt.', value: '23 May, 2023' },
               { label: 'Family doctor', value: 'Dr G. Mclar' }
             ].map((item, idx) => (
-              <div key={idx} className={`${idx !== 5 ? 'border-r border-slate-100' : ''} pr-4 last:border-0`}>
+              <div key={idx} className={`${idx !== 5 ? 'border-r border-slate-200' : ''} pr-4 last:border-0`}>
                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">{item.label}</p>
                 <p className={`text-sm font-bold truncate ${item.isBadge ? 'text-slate-900 bg-emerald-50 inline-block px-2 py-0.5 rounded border border-emerald-100' : 'text-slate-800'}`}>
                   {item.value}
@@ -267,7 +338,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 flex items-center justify-between border-b border-slate-100">
+          <div className="p-6 flex items-center justify-between border-b border-slate-200">
             <h3 className="font-bold text-slate-800 text-lg">Care plans</h3>
             <button className="text-emerald-500 text-sm font-bold flex items-center gap-1 hover:underline transition-all">
               View all <ArrowRight size={14} />
@@ -276,24 +347,24 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100">
+                <tr className="bg-slate-50 border-b border-slate-200">
                   <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Plan name</th>
                   <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Priority</th>
                   <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Due date</th>
                   <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-200">
                 {[
                   { name: 'Dissguss the benefits of regular exercise & developed a personalized exercise plan', priority: 'Medium', date: '24 April, 2023', status: 'Not yet started' },
                   { name: "Assess the patient's current activity level and any limitations or concerns.", priority: 'Medium', date: '24 April, 2023', status: 'Started', active: true },
                 ].map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/30 group">
+                  <tr key={idx} className="hover:bg-slate-50 group">
                     <td className="px-6 py-5 text-sm font-semibold text-slate-700 max-w-md">{row.name}</td>
                     <td className="px-6 py-5 text-sm font-medium text-slate-600">{row.priority}</td>
                     <td className="px-6 py-5 text-sm font-medium text-slate-600">{row.date}</td>
                     <td className="px-6 py-5 text-center">
-                      <span className={`px-3 py-1.5 rounded-md text-[11px] font-bold border transition-all ${row.active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+                      <span className={`px-3 py-1.5 rounded-md text-[11px] font-bold border transition-all ${row.active ? 'bg-emerald-50 text-emerald-600 border-emerald-300' : 'bg-slate-50 text-slate-400 border-slate-200'}`}>
                         {row.status}
                       </span>
                     </td>
@@ -317,7 +388,9 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           <div className="space-y-4 relative">
             <div className="space-y-6">
               <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Upcoming</p>
-              {timelineData.filter(i => i.type === 'upcoming').map((item, index) => renderTimelineItem(item, false))}
+              <div className="pl-4">
+                 {renderTimelineItem(timelineData[0], true)}
+              </div>
             </div>
           </div>
         </div>
@@ -367,7 +440,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
         {activeTab === 'Overview' && renderOverviewTab()}
         {activeTab === 'Medications' && renderMedicationsTab()}
         {!['Overview', 'Medications'].includes(activeTab) && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-20 text-center">
+          <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-20 text-center">
             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-400">
                <FileText size={32} />
             </div>

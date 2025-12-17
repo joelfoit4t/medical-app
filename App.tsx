@@ -47,6 +47,7 @@ function App() {
             appointments={appointments} 
             onUpdateAppointment={handleUpdateAppointment}
             onDeleteAppointment={handleDeleteAppointment}
+            onAddAppointment={() => setActiveNav('Add Appointment')}
           />
         );
       case 'Add Appointment':
@@ -63,6 +64,7 @@ function App() {
             patients={patients} 
             setPatients={setPatients} 
             onViewProfile={handleNavigateToProfile}
+            onAddPatient={() => setActiveNav('Add Patient')}
           />
         );
       case 'Patient Profile':
@@ -114,7 +116,7 @@ function App() {
       <div className="flex-1 flex flex-col min-w-0">
         <Header activeNav={activeNav} onMenuClick={() => setIsSidebarOpen(true)} />
         
-        <main className="lg:pl-64 pt-16 flex-1 overflow-y-auto">
+        <main className="lg:pl-64 pt-16 flex-1 overflow-y-auto bg-[#fcfcfc]">
           {renderContent()}
         </main>
       </div>
