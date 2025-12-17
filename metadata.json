@@ -1,0 +1,5 @@
+{
+  "name": "Medicare Dashboard",
+  "description": "A comprehensive medical appointment scheduling dashboard featuring a calendar view, patient management, and smart scheduling tools.",
+  "requestFramePermissions": []
+}
