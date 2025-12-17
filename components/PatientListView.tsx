@@ -13,16 +13,11 @@ import {
   ChevronRight,
   LayoutGrid,
   List,
-  Settings,
   Pencil,
   Trash2,
   X,
   Save,
-  UserCircle,
-  Calendar,
-  Dna,
-  Clock,
-  User
+  UserCircle
 } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { PatientStatus, Patient } from '../types';
@@ -161,15 +156,12 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
           <Users size={20} className="text-[#10b981]" /> View Profile
         </button>
         <div className="h-px bg-slate-50 mx-6" />
-        <div className="p-3">
-          <button 
-            onClick={(e) => handleDeletePatient(e, patient.id)} 
-            className="w-full flex flex-col items-center justify-center gap-3 p-5 rounded-[1.5rem] border-[3px] border-[#fca5a5] bg-[#fff1f2] hover:bg-red-50 text-red-600 transition-all active:scale-[0.98] group"
-          >
-            <Trash2 size={32} className="text-red-500 group-hover:scale-110 transition-transform" />
-            <span className="text-xs font-black uppercase tracking-[0.2em] text-center">Remove Record</span>
-          </button>
-        </div>
+        <button 
+          onClick={(e) => handleDeletePatient(e, patient.id)} 
+          className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <Trash2 size={20} className="text-red-500" /> Remove Record
+        </button>
       </div>
     </div>
   );
@@ -275,9 +267,6 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
                     <List size={16} />
                 </button>
             </div>
-             <button className="p-2 border border-slate-200 rounded-lg text-slate-400 hover:bg-slate-50 transition-colors">
-                <Settings size={18} />
-             </button>
           </div>
         </div>
 

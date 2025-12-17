@@ -13,7 +13,6 @@ import {
   ChevronRight,
   Mail,
   Clock,
-  Settings,
   LayoutGrid,
   List,
   X,
@@ -151,10 +150,6 @@ export const StaffListView: React.FC = () => {
                     <List size={16} />
                 </button>
             </div>
-
-             <button className="p-2 border border-slate-200 rounded-lg text-slate-400 hover:bg-slate-50 transition-colors">
-                <Settings size={18} />
-             </button>
           </div>
         </div>
 
@@ -437,7 +432,7 @@ export const StaffListView: React.FC = () => {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-[2] py-3 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="flex-[2] py-3 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all active:scale-95"
                 >
                   <Plus size={18} /> Register Staff
                 </button>

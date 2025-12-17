@@ -5,9 +5,7 @@ import {
   List, 
   Calendar as CalendarIcon, 
   SlidersHorizontal, 
-  Settings, 
   Clock, 
-  Sparkles, 
   X,
   MoreHorizontal,
   Check,
@@ -16,13 +14,11 @@ import {
   Calendar as CalendarDropdown,
   Pencil,
   Trash2,
-  Save,
   FileText,
   UserCircle
 } from 'lucide-react';
 import { TIME_SLOTS } from '../constants';
 import { AppointmentCard } from './AppointmentCard';
-import { getSmartSchedulingSuggestion } from '../services/geminiService';
 import { AppointmentStatus, Appointment } from '../types';
 
 type ViewType = 'calendar' | 'list';
@@ -35,9 +31,6 @@ interface Props {
 
 export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointment, onDeleteAppointment }) => {
   const [viewType, setViewType] = useState<ViewType>('list'); // Default to list view as requested
-  const [showAiModal, setShowAiModal] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiSuggestion, setAiSuggestion] = useState<string>('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   
   // Pagination State
@@ -140,15 +133,6 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
     };
   };
 
-  const handleSmartSchedule = async () => {
-    setShowAiModal(true);
-    setAiLoading(true);
-    setAiSuggestion('');
-    const suggestion = await getSmartSchedulingSuggestion(currentDate.toISOString().split('T')[0], filteredAppointments);
-    setAiSuggestion(suggestion);
-    setAiLoading(false);
-  };
-
   const handleEditClick = (e: React.MouseEvent, apt: Appointment) => {
     e.preventDefault();
     e.stopPropagation();
@@ -238,13 +222,9 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
           </div>
           
           <div className="flex items-center gap-2 order-3 ml-auto xl:ml-0">
-             <button onClick={handleSmartSchedule} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-emerald-200 transition-all active:scale-95">
-               <Sparkles size={16} /> Smart Assist
-             </button>
              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 font-bold hover:bg-slate-50 shadow-sm transition-all">
                <SlidersHorizontal size={16} /> Filter
              </button>
-             <button className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 bg-white shadow-sm"><Settings size={18} /></button>
           </div>
         </div>
       </div>
@@ -343,22 +323,17 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                               <div className="py-2">
                                 <button 
                                   onClick={(e) => handleEditClick(e, apt)} 
-                                  className="w-full flex items-center gap-3 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                                  className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
                                 >
                                   <Pencil size={20} className="text-emerald-500" /> Edit Appointment
                                 </button>
                                 <div className="h-px bg-slate-50 mx-6" />
-                                <div className="p-3">
-                                  <button 
-                                    onClick={(e) => handleDeleteClick(e, apt.id)} 
-                                    className="w-full flex flex-col items-center justify-center gap-3 p-5 rounded-[1.5rem] border-[3px] border-[#10b981] bg-[#fff1f2] hover:bg-red-50 text-red-600 transition-all active:scale-[0.98] group"
-                                  >
-                                    <Trash2 size={32} className="text-red-500 group-hover:scale-110 transition-transform" />
-                                    <span className="text-xs font-black uppercase tracking-[0.2em] text-center leading-relaxed">
-                                      Delete<br/>Appointment
-                                    </span>
-                                  </button>
-                                </div>
+                                <button 
+                                  onClick={(e) => handleDeleteClick(e, apt.id)} 
+                                  className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
+                                >
+                                  <Trash2 size={20} className="text-red-500" /> Remove APPT
+                                </button>
                               </div>
                             </div>
                           )}
@@ -445,7 +420,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
 
               <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Status</label>
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Status</label>
                   <div className="relative">
                     <select 
                       className="w-full px-6 py-5 bg-[#f8fafc] border border-slate-100 rounded-[1.5rem] text-sm focus:outline-none focus:ring-4 focus:ring-emerald-50 focus:border-emerald-500 transition-all cursor-pointer appearance-none font-semibold text-slate-700" 
@@ -522,37 +497,6 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* AI Modal */}
-      {showAiModal && (
-        <div className="absolute inset-0 z-[70] flex items-center justify-center bg-slate-900/10 backdrop-blur-[2px] rounded-2xl">
-          <div className="bg-white rounded-3xl shadow-2xl w-[400px] p-8 border border-white/50 animate-in fade-in zoom-in duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600"><Sparkles size={24} /></div>
-                <div>
-                    <h3 className="font-bold text-slate-800">Smart Assistant</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">AI Powered Scheduling</p>
-                </div>
-              </div>
-              <button onClick={() => setShowAiModal(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-xl"><X size={20} /></button>
-            </div>
-            {aiLoading ? (
-               <div className="py-12 flex flex-col items-center gap-4 text-slate-500">
-                 <div className="w-8 h-8 border-[3px] border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                 <p className="text-sm font-bold animate-pulse">Analyzing schedule...</p>
-               </div>
-            ) : (
-              <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 max-h-[400px] overflow-y-auto custom-scrollbar">
-                <div className="text-sm text-slate-600 leading-relaxed font-medium" dangerouslySetInnerHTML={{ __html: aiSuggestion }}></div>
-              </div>
-            )}
-            <div className="mt-6 flex justify-end">
-              <button onClick={() => setShowAiModal(false)} className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-2.5 rounded-xl transition-all">Dismiss</button>
-            </div>
           </div>
         </div>
       )}
