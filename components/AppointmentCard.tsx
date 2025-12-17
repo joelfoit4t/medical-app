@@ -33,8 +33,8 @@ export const AppointmentCard: React.FC<Props> = ({ appointment }) => {
       iconText = 'Patient is waiting';
       break;
     case AppointmentStatus.Scheduled:
-      badgeClass = 'bg-sky-100 text-sky-700';
-      stripColor = 'bg-sky-500';
+      badgeClass = 'bg-emerald-100 text-emerald-700';
+      stripColor = 'bg-emerald-500';
       Icon = Clock;
       iconText = 'Scheduled';
       break;

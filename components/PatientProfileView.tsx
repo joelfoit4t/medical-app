@@ -52,7 +52,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
         </div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation - Interaction now shows green hue */}
       <div className="bg-white border-b border-slate-200 px-6 overflow-x-auto sticky top-16 z-20 shadow-sm">
         <div className="flex gap-8">
           {tabs.map((tab) => (
@@ -87,7 +87,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   <div className="flex items-center gap-3">
                     <h2 className="text-xl font-bold text-slate-800">{selectedPatient.name}</h2>
                     <span className="text-slate-400 text-sm font-medium">#ID : 2178{selectedPatient.id.padStart(4, '0')}</span>
-                    <button className="text-slate-300 hover:text-slate-500 transition-colors">
+                    <button className="text-slate-300 hover:text-emerald-500 transition-colors">
                       <Copy size={14} />
                     </button>
                   </div>
@@ -121,7 +121,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
               ].map((item, idx) => (
                 <div key={idx} className={`${idx !== 5 ? 'border-r border-slate-100' : ''} pr-4 last:border-0`}>
                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">{item.label}</p>
-                  <p className={`text-sm font-bold truncate ${item.isBadge ? 'text-slate-900 bg-slate-50 inline-block px-2 py-0.5 rounded border border-slate-200' : 'text-slate-800'}`}>
+                  <p className={`text-sm font-bold truncate ${item.isBadge ? 'text-slate-900 bg-emerald-50 inline-block px-2 py-0.5 rounded border border-emerald-100' : 'text-slate-800'}`}>
                     {item.value}
                   </p>
                 </div>
@@ -289,7 +289,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   { title: 'Emergency issue', date: '24 May, 2023' }
                 ].map((item, idx) => (
                   <div key={idx} className="relative pl-8">
-                    <div className="absolute left-[3px] top-1.5 w-3 h-3 rounded-full border-2 border-slate-200 bg-white z-10"></div>
+                    <div className="absolute left-[3px] top-1.5 w-3 h-3 rounded-full border-2 border-emerald-500 bg-white z-10"></div>
                     {idx !== 2 && (
                       <div className="absolute left-[8px] top-4 bottom-[-24px] w-[1px] bg-slate-100 border-l border-dashed border-slate-300"></div>
                     )}
@@ -298,7 +298,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                         <p className="text-sm font-bold text-slate-800">{item.title}</p>
                         <p className="text-xs text-slate-400 font-medium mt-1">{item.date}</p>
                       </div>
-                      <ChevronDown size={16} className="text-slate-300" />
+                      <ChevronDown size={16} className="text-slate-300 hover:text-emerald-500 transition-colors" />
                     </div>
                   </div>
                 ))}

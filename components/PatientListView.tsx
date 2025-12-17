@@ -132,7 +132,7 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
   const renderStatusBadge = (status: PatientStatus) => {
     switch (status) {
       case PatientStatus.Stable:
-        return <span className="inline-flex px-3 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-500">Stable</span>;
+        return <span className="inline-flex px-3 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-600">Stable</span>;
       case PatientStatus.Critical:
         return <span className="inline-flex px-3 py-1 rounded-full text-[11px] font-bold bg-red-50 text-red-500">Critical</span>;
       case PatientStatus.Mild:
@@ -150,13 +150,13 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
       <div className="py-2">
         <button 
           onClick={(e) => handleEditClick(e, patient)} 
-          className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+          className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-emerald-50 transition-colors"
         >
           <Pencil size={20} className="text-[#10b981]" /> Edit Patient
         </button>
         <button 
           onClick={(e) => handleViewProfileClick(e, patient.id)} 
-          className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+          className="w-full flex items-center gap-4 px-6 py-4 text-sm font-bold text-slate-700 hover:bg-emerald-50 transition-colors"
         >
           <Users size={20} className="text-[#10b981]" /> View Profile
         </button>
@@ -182,7 +182,7 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
           label="Total patients" 
           value={stats.total} 
           icon={Users} 
-          colorClass="bg-indigo-900" 
+          colorClass="bg-slate-900" 
           isActive={filter === 'All'}
           onClick={() => handleStatClick('All')}
         />
@@ -198,7 +198,7 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
           label="Stable patients" 
           value={stats.stable} 
           icon={RefreshCcw} 
-          colorClass="bg-sky-500" 
+          colorClass="bg-teal-500" 
           isActive={filter === PatientStatus.Stable}
           onClick={() => handleStatClick(PatientStatus.Stable)}
         />
@@ -264,13 +264,13 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
             <div className="flex bg-slate-100 p-1 rounded-lg">
                 <button 
                     onClick={() => setViewMode('grid')}
-                    className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-emerald-500 shadow-sm border-emerald-500/10' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     <LayoutGrid size={16} />
                 </button>
                 <button 
                     onClick={() => setViewMode('list')}
-                    className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-emerald-500 shadow-sm border-emerald-500/10' : 'text-slate-400 hover:text-slate-600'}`}
                 >
                     <List size={16} />
                 </button>
