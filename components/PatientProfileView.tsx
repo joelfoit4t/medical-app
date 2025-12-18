@@ -63,7 +63,7 @@ const MaterialDatePicker: React.FC<{
 }> = ({ value, onChange, onClose }) => {
   // Use current date as default view if no value provided
   const initialDate = useMemo(() => {
-    if (!value) return new Date();
+    if (!value || value === 'Prescription date' || value === 'Select Date') return new Date();
     const d = new Date(value);
     return isNaN(d.getTime()) ? new Date() : d;
   }, [value]);
@@ -195,7 +195,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
     dosage: '',
     instructions: '',
     prescribedBy: '',
-    prescrDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    prescrDate: ''
   });
 
   const medFilterRef = useRef<HTMLDivElement>(null);
@@ -278,7 +278,8 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
     const medication: Medication = {
       ...newMedication,
       id: `m${Date.now()}`,
-      isActive: true
+      isActive: true,
+      prescrDate: newMedication.prescrDate || new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     };
     setMedications(prev => [medication, ...prev]);
     setIsAddMedModalOpen(false);
@@ -288,7 +289,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
       dosage: '',
       instructions: '',
       prescribedBy: '',
-      prescrDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+      prescrDate: ''
     });
     setShowDatePicker(false);
   };
@@ -626,7 +627,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm" 
                   value={newMedication.name} 
                   onChange={e => setNewMedication({...newMedication, name: e.target.value})} 
-                  placeholder="0 - Amoxicillin" 
+                  placeholder="Medication name" 
                 />
                 
                 <div className="grid grid-cols-2 gap-5">
@@ -636,7 +637,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm" 
                     value={newMedication.strength} 
                     onChange={e => setNewMedication({...newMedication, strength: e.target.value})} 
-                    placeholder="500mg" 
+                    placeholder="Strength" 
                   />
                   <input 
                     type="text" 
@@ -644,7 +645,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm" 
                     value={newMedication.dosage} 
                     onChange={e => setNewMedication({...newMedication, dosage: e.target.value})} 
-                    placeholder="2 capsules" 
+                    placeholder="Dosage" 
                   />
                 </div>
 
@@ -654,7 +655,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   rows={3}
                   value={newMedication.instructions} 
                   onChange={e => setNewMedication({...newMedication, instructions: e.target.value})} 
-                  placeholder="Mornings only without meal" 
+                  placeholder="Instructions" 
                 />
 
                 <div className="grid grid-cols-2 gap-5">
@@ -665,7 +666,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                       className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm" 
                       value={newMedication.prescribedBy} 
                       onChange={e => setNewMedication({...newMedication, prescribedBy: e.target.value})} 
-                      placeholder="Dr. Jane Sully" 
+                      placeholder="Prescribed by" 
                     />
                     <UserIcon size={20} className="absolute right-7 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none" />
                   </div>
@@ -676,7 +677,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                       className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm flex items-center justify-between cursor-pointer group"
                     >
                       <span className={newMedication.prescrDate ? 'text-slate-800' : 'text-slate-300'}>
-                        {newMedication.prescrDate || '23 July, 2023'}
+                        {newMedication.prescrDate || 'Prescription date'}
                       </span>
                       <Calendar size={22} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
                     </div>
@@ -724,7 +725,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm" 
                   value={editingMedication.name} 
                   onChange={e => setEditingMedication({...editingMedication, name: e.target.value})} 
-                  placeholder="Medication Name" 
+                  placeholder="Medication name" 
                 />
                 
                 <div className="grid grid-cols-2 gap-5">
@@ -759,7 +760,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                       className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm" 
                       value={editingMedication.prescribedBy} 
                       onChange={e => setEditingMedication({...editingMedication, prescribedBy: e.target.value})} 
-                      placeholder="Prescribed By" 
+                      placeholder="Prescribed by" 
                     />
                     <UserIcon size={20} className="absolute right-7 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none" />
                   </div>
@@ -770,7 +771,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                       className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm flex items-center justify-between cursor-pointer group"
                     >
                       <span className={editingMedication.prescrDate ? 'text-slate-800' : 'text-slate-300'}>
-                        {editingMedication.prescrDate || 'Select Date'}
+                        {editingMedication.prescrDate || 'Prescription date'}
                       </span>
                       <Calendar size={22} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
                     </div>
