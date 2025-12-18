@@ -112,7 +112,7 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
       </div>
 
       <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-        {/* Top bar like in screenshot */}
+        {/* Top bar */}
         <div className="px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative" ref={filterMenuRef}>
@@ -237,34 +237,48 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
           </table>
         </div>
 
-        {/* Pagination Footer */}
-        <div className="px-8 py-6 border-t border-slate-200 flex items-center justify-between bg-slate-50/20">
-          <span className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-            Showing {paginatedPatients.length} of {filteredPatients.length} entries
-          </span>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${currentPage === 1 ? 'text-slate-200' : 'text-slate-400 hover:bg-slate-100'}`}
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <div className="flex items-center gap-1">
+        {/* Updated Pagination Footer */}
+        <div className="px-8 py-6 border-t border-slate-200 flex items-center justify-between bg-white">
+          <div className="flex items-center gap-12">
+            <span className="text-[11px] text-slate-400 font-bold uppercase tracking-widest whitespace-nowrap">
+              Showing {paginatedPatients.length} of {filteredPatients.length} patients
+            </span>
+            <div className="flex items-center gap-3">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                 <button 
                   key={p} 
                   onClick={() => setCurrentPage(p)}
-                  className={`w-9 h-9 rounded-full text-xs font-bold transition-all ${p === currentPage ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'text-slate-400 hover:bg-slate-50'}`}
+                  className={`w-9 h-9 rounded-full text-xs font-bold transition-all ${
+                    p === currentPage 
+                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' 
+                      : 'text-slate-400 hover:text-slate-700'
+                  }`}
                 >
                   {p}
                 </button>
               ))}
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`w-10 h-10 rounded-full flex items-center justify-center border border-slate-200 transition-all ${
+                currentPage === 1 
+                  ? 'text-slate-200 cursor-not-allowed' 
+                  : 'text-slate-400 hover:bg-slate-50 hover:border-slate-300 hover:text-emerald-500'
+              }`}
+            >
+              <ChevronLeft size={18} />
+            </button>
             <button 
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${currentPage === totalPages ? 'text-slate-200' : 'text-slate-400 hover:bg-slate-100'}`}
+              className={`w-10 h-10 rounded-full flex items-center justify-center border border-slate-200 transition-all ${
+                currentPage === totalPages 
+                  ? 'text-slate-200 cursor-not-allowed' 
+                  : 'text-slate-400 hover:bg-slate-50 hover:border-slate-300 hover:text-emerald-500'
+              }`}
             >
               <ChevronRight size={18} />
             </button>

@@ -273,7 +273,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                   <thead>
                     <tr className="border-y border-slate-200 bg-slate-50/30">
                       <th className="px-8 py-4 w-10 border-r border-slate-200"><input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" /></th>
-                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">ID</th>
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">ID</th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Patient Name</th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Date</th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Time</th>
@@ -287,7 +287,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                     {paginatedAppointments.length > 0 ? paginatedAppointments.map((apt) => (
                       <tr key={apt.id} className="hover:bg-slate-50/30 transition-colors group">
                         <td className="px-8 py-5 border-r border-slate-200"><input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" /></td>
-                        <td className="px-8 py-5 text-sm font-medium text-slate-500 border-r border-slate-200">{apt.id.split('-').pop()?.substring(0, 4)}</td>
+                        <td className="px-8 py-5 text-sm font-medium text-slate-500 border-r border-slate-200 text-center">{apt.id.split('-').pop()?.substring(0, 4)}</td>
                         <td className="px-8 py-5 text-sm font-bold text-slate-800 border-r border-slate-200">{apt.patientName}</td>
                         <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{apt.date}</td>
                         <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{apt.startTime}</td>
@@ -336,10 +336,42 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
              </div>
 
              <div className="px-8 py-6 border-t border-slate-200 flex items-center justify-between bg-white">
-                <span className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Showing {paginatedAppointments.length} of {displayAppointments.length} sessions</span>
+                <div className="flex items-center gap-12">
+                  <span className="text-[11px] text-slate-400 font-bold uppercase tracking-widest whitespace-nowrap">
+                    Showing {paginatedAppointments.length} of {displayAppointments.length} sessions
+                  </span>
+                  <div className="flex items-center gap-3">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <button 
+                        key={p} 
+                        onClick={() => setCurrentPage(p)}
+                        className={`w-9 h-9 rounded-full text-xs font-bold transition-all ${
+                          p === currentPage 
+                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' 
+                            : 'text-slate-400 hover:text-slate-700'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-200 text-slate-400 hover:bg-slate-50"><ChevronLeft size={18} /></button>
-                  <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-200 text-slate-400 hover:bg-slate-50"><ChevronRight size={18} /></button>
+                  <button 
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                    disabled={currentPage === 1} 
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border border-slate-200 transition-all ${currentPage === 1 ? 'text-slate-200 cursor-not-allowed' : 'text-slate-400 hover:bg-slate-50 hover:border-slate-300 hover:text-emerald-500'}`}
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button 
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                    disabled={currentPage === totalPages} 
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border border-slate-200 transition-all ${currentPage === totalPages ? 'text-slate-200 cursor-not-allowed' : 'text-slate-400 hover:bg-slate-50 hover:border-slate-300 hover:text-emerald-500'}`}
+                  >
+                    <ChevronRight size={18} />
+                  </button>
                 </div>
              </div>
           </div>
