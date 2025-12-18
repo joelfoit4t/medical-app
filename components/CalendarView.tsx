@@ -423,18 +423,77 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
         )}
       </div>
 
-      {/* Edit Modal (Material Design 3 style) */}
+      {/* Edit Modal (Redesigned to match the screenshot) */}
       {isEditModalOpen && editingAppointment && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setIsEditModalOpen(false)} />
-          <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-8">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">Edit Appointment</h2>
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-10">
+            <h2 className="text-2xl font-bold text-[#1e293b] mb-8">Edit Appointment</h2>
             <form onSubmit={handleSaveEdit} className="space-y-6">
-              <input type="text" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold" value={editingAppointment.patientName} onChange={e => setEditingAppointment({...editingAppointment, patientName: e.target.value})} placeholder="Patient Name" />
-              <input type="text" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold" value={editingAppointment.reason} onChange={e => setEditingAppointment({...editingAppointment, reason: e.target.value})} placeholder="Reason" />
-              <div className="flex gap-4">
-                <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 py-4 text-emerald-600 font-bold uppercase tracking-widest text-sm">Cancel</button>
-                <button type="submit" className="flex-1 py-4 bg-emerald-500 text-white font-bold rounded-full shadow-lg shadow-emerald-200 uppercase tracking-widest text-sm">Save</button>
+              <div className="space-y-4">
+                <input 
+                  type="text" 
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[18px] text-sm font-semibold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
+                  value={editingAppointment.patientName} 
+                  onChange={e => setEditingAppointment({...editingAppointment, patientName: e.target.value})} 
+                  placeholder="Patient Name" 
+                />
+                <input 
+                  type="text" 
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[18px] text-sm font-semibold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
+                  value={editingAppointment.reason} 
+                  onChange={e => setEditingAppointment({...editingAppointment, reason: e.target.value})} 
+                  placeholder="Reason for Visit" 
+                />
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <input 
+                    type="date" 
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[18px] text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
+                    value={editingAppointment.date} 
+                    onChange={e => setEditingAppointment({...editingAppointment, date: e.target.value})} 
+                  />
+                  <select 
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[18px] text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
+                    value={editingAppointment.status}
+                    onChange={e => setEditingAppointment({...editingAppointment, status: e.target.value as AppointmentStatus})}
+                  >
+                    {Object.values(AppointmentStatus).map(status => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <input 
+                    type="time" 
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[18px] text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
+                    value={editingAppointment.startTime} 
+                    onChange={e => setEditingAppointment({...editingAppointment, startTime: e.target.value})} 
+                  />
+                  <input 
+                    type="time" 
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[18px] text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
+                    value={editingAppointment.endTime} 
+                    onChange={e => setEditingAppointment({...editingAppointment, endTime: e.target.value})} 
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-6 pt-6">
+                <button 
+                  type="button" 
+                  onClick={() => setIsEditModalOpen(false)} 
+                  className="px-6 py-3 text-emerald-600 font-bold uppercase tracking-widest text-sm hover:text-emerald-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-12 py-4 bg-[#10b981] text-white font-bold rounded-full shadow-[0_8px_20px_-4px_rgba(16,185,129,0.4)] hover:bg-[#059669] hover:shadow-[0_8px_24px_-4px_rgba(16,185,129,0.5)] transition-all uppercase tracking-widest text-sm"
+                >
+                  Save
+                </button>
               </div>
             </form>
           </div>
