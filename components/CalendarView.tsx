@@ -45,6 +45,9 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
   // Filtering states
   const [statusFilter, setStatusFilter] = useState<'All' | AppointmentStatus>('All');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
@@ -68,6 +71,27 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const toggleSelection = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const toggleAllOnPage = (ids: string[]) => {
+    const newSelected = new Set(selectedIds);
+    const allSelected = ids.every(id => newSelected.has(id));
+    if (allSelected) {
+      ids.forEach(id => newSelected.delete(id));
+    } else {
+      ids.forEach(id => newSelected.add(id));
+    }
+    setSelectedIds(newSelected);
+  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -272,7 +296,14 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-y border-slate-200 bg-slate-50/30">
-                      <th className="px-8 py-4 w-10 border-r border-slate-200"><input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" /></th>
+                      <th className="px-8 py-4 w-10 border-r border-slate-200">
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer" 
+                          checked={paginatedAppointments.length > 0 && paginatedAppointments.every(apt => selectedIds.has(apt.id))}
+                          onChange={() => toggleAllOnPage(paginatedAppointments.map(apt => apt.id))}
+                        />
+                      </th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">ID</th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Patient Name</th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Date</th>
@@ -284,37 +315,51 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
-                    {paginatedAppointments.length > 0 ? paginatedAppointments.map((apt) => (
-                      <tr key={apt.id} className="hover:bg-slate-50/30 transition-colors group">
-                        <td className="px-8 py-5 border-r border-slate-200"><input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" /></td>
-                        <td className="px-8 py-5 text-sm font-medium text-slate-500 border-r border-slate-200 text-center">{apt.id.split('-').pop()?.substring(0, 4)}</td>
-                        <td className="px-8 py-5 text-sm font-bold text-slate-800 border-r border-slate-200">{apt.patientName}</td>
-                        <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{apt.date}</td>
-                        <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{apt.startTime}</td>
-                        <td className="px-8 py-5 border-r border-slate-200">
-                          <div className="flex items-center gap-2">
-                            <img src={`https://i.pravatar.cc/150?u=dr-${apt.id}`} className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" />
-                            <span className="text-sm font-medium text-slate-700">Dr. Lily Cooper</span>
-                          </div>
-                        </td>
-                        <td className="px-8 py-5 text-sm text-slate-600 font-medium border-r border-slate-200">{apt.reason}</td>
-                        <td className="px-8 py-5 text-center border-r border-slate-200">{renderStatusBadge(apt.status)}</td>
-                        <td className="px-8 py-5 text-right relative">
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === apt.id ? null : apt.id); }}
-                            className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
-                          >
-                            <MoreHorizontal size={20} />
-                          </button>
-                          {activeMenuId === apt.id && (
-                            <div ref={menuRef} className="absolute right-0 top-10 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden py-1">
-                               <button onClick={(e) => handleEditClick(e, apt)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"><Pencil size={14} /> Edit</button>
-                               <button onClick={(e) => handleDeleteClick(e, apt.id)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"><Trash2 size={14} /> Delete</button>
+                    {paginatedAppointments.length > 0 ? paginatedAppointments.map((apt) => {
+                      const isSelected = selectedIds.has(apt.id);
+                      return (
+                        <tr 
+                          key={apt.id} 
+                          onClick={() => toggleSelection(apt.id)}
+                          className={`transition-colors group cursor-pointer ${isSelected ? 'bg-emerald-50/40' : 'hover:bg-emerald-50/20'}`}
+                        >
+                          <td className="px-8 py-5 border-r border-slate-200" onClick={(e) => e.stopPropagation()}>
+                            <input 
+                              type="checkbox" 
+                              className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer" 
+                              checked={isSelected}
+                              onChange={() => toggleSelection(apt.id)}
+                            />
+                          </td>
+                          <td className="px-8 py-5 text-sm font-medium text-slate-500 border-r border-slate-200 text-center">{apt.id.split('-').pop()?.substring(0, 4)}</td>
+                          <td className="px-8 py-5 text-sm font-bold text-slate-800 border-r border-slate-200">{apt.patientName}</td>
+                          <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{apt.date}</td>
+                          <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{apt.startTime}</td>
+                          <td className="px-8 py-5 border-r border-slate-200">
+                            <div className="flex items-center gap-2">
+                              <img src={`https://i.pravatar.cc/150?u=dr-${apt.id}`} className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" />
+                              <span className="text-sm font-medium text-slate-700">Dr. Lily Cooper</span>
                             </div>
-                          )}
-                        </td>
-                      </tr>
-                    )) : (
+                          </td>
+                          <td className="px-8 py-5 text-sm text-slate-600 font-medium border-r border-slate-200">{apt.reason}</td>
+                          <td className="px-8 py-5 text-center border-r border-slate-200">{renderStatusBadge(apt.status)}</td>
+                          <td className="px-8 py-5 text-right relative" onClick={(e) => e.stopPropagation()}>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === apt.id ? null : apt.id); }}
+                              className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                              <MoreHorizontal size={20} />
+                            </button>
+                            {activeMenuId === apt.id && (
+                              <div ref={menuRef} className="absolute right-0 top-10 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden py-1">
+                                <button onClick={(e) => handleEditClick(e, apt)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"><Pencil size={14} /> Edit</button>
+                                <button onClick={(e) => handleDeleteClick(e, apt.id)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"><Trash2 size={14} /> Delete</button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    }) : (
                       <tr>
                         <td colSpan={9} className="px-8 py-20 text-center">
                           <div className="flex flex-col items-center gap-3 text-slate-400">

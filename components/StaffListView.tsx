@@ -32,6 +32,9 @@ export const StaffListView: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   // New Staff Form State
   const [newStaff, setNewStaff] = useState({
     name: '',
@@ -42,6 +45,28 @@ export const StaffListView: React.FC = () => {
   });
 
   const ITEMS_PER_PAGE = viewMode === 'list' ? 10 : 6;
+
+  // Selection handlers
+  const toggleSelection = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const toggleAllOnPage = (ids: string[]) => {
+    const newSelected = new Set(selectedIds);
+    const allSelected = ids.every(id => newSelected.has(id));
+    if (allSelected) {
+      ids.forEach(id => newSelected.delete(id));
+    } else {
+      ids.forEach(id => newSelected.add(id));
+    }
+    setSelectedIds(newSelected);
+  };
 
   // Filter staff based on search query and status filter
   const filteredStaff = useMemo(() => {
@@ -210,7 +235,12 @@ export const StaffListView: React.FC = () => {
               <thead>
                 <tr className="border-y border-slate-200 bg-slate-50/30">
                   <th className="px-8 py-4 w-10 border-r border-slate-200">
-                    <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
+                    <input 
+                      type="checkbox" 
+                      className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer" 
+                      checked={paginatedStaff.length > 0 && paginatedStaff.every(s => selectedIds.has(s.id))}
+                      onChange={() => toggleAllOnPage(paginatedStaff.map(s => s.id))}
+                    />
                   </th>
                   <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">ID</th>
                   <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Staff Name</th>
@@ -223,42 +253,54 @@ export const StaffListView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                {paginatedStaff.length > 0 ? paginatedStaff.map((member) => (
-                  <tr key={member.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-8 py-5 border-r border-slate-200">
-                      <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
-                    </td>
-                    <td className="px-8 py-5 text-sm font-medium text-slate-500 border-r border-slate-200 text-center">
-                      {member.id.toUpperCase()}
-                    </td>
-                    <td className="px-8 py-5 border-r border-slate-200">
-                      <div className="flex items-center gap-3">
-                        <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-sm" />
-                        <span className="text-sm font-bold text-slate-800">{member.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-5 text-sm font-medium text-slate-700 border-r border-slate-200">
-                      {member.role}
-                    </td>
-                    <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200">
-                      {member.department}
-                    </td>
-                    <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200">
-                      {member.email}
-                    </td>
-                    <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center font-medium">
-                      {member.schedule.split(',')[1]?.trim() || member.schedule}
-                    </td>
-                    <td className="px-8 py-5 text-center border-r border-slate-200">
-                      {renderStatusBadge(member.status)}
-                    </td>
-                    <td className="px-8 py-5 text-right">
-                      <button className="text-slate-400 hover:text-emerald-600 p-1 rounded-lg hover:bg-emerald-50 transition-all">
-                        <MoreHorizontal size={20} />
-                      </button>
-                    </td>
-                  </tr>
-                )) : (
+                {paginatedStaff.length > 0 ? paginatedStaff.map((member) => {
+                  const isSelected = selectedIds.has(member.id);
+                  return (
+                    <tr 
+                      key={member.id} 
+                      onClick={() => toggleSelection(member.id)}
+                      className={`transition-colors group cursor-pointer ${isSelected ? 'bg-emerald-50/40' : 'hover:bg-emerald-50/20'}`}
+                    >
+                      <td className="px-8 py-5 border-r border-slate-200" onClick={(e) => e.stopPropagation()}>
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer" 
+                          checked={isSelected}
+                          onChange={() => toggleSelection(member.id)}
+                        />
+                      </td>
+                      <td className="px-8 py-5 text-sm font-medium text-slate-500 border-r border-slate-200 text-center">
+                        {member.id.toUpperCase()}
+                      </td>
+                      <td className="px-8 py-5 border-r border-slate-200">
+                        <div className="flex items-center gap-3">
+                          <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-sm" />
+                          <span className="text-sm font-bold text-slate-800">{member.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5 text-sm font-medium text-slate-700 border-r border-slate-200">
+                        {member.role}
+                      </td>
+                      <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200">
+                        {member.department}
+                      </td>
+                      <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200">
+                        {member.email}
+                      </td>
+                      <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center font-medium">
+                        {member.schedule.split(',')[1]?.trim() || member.schedule}
+                      </td>
+                      <td className="px-8 py-5 text-center border-r border-slate-200">
+                        {renderStatusBadge(member.status)}
+                      </td>
+                      <td className="px-8 py-5 text-right" onClick={(e) => e.stopPropagation()}>
+                        <button className="text-slate-400 hover:text-emerald-600 p-1 rounded-lg hover:bg-emerald-50 transition-all">
+                          <MoreHorizontal size={20} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                }) : (
                   <tr>
                     <td colSpan={9} className="px-8 py-20 text-center">
                       <div className="flex flex-col items-center gap-3 text-slate-400">
@@ -481,7 +523,10 @@ export const StaffListView: React.FC = () => {
                   type="submit"
                   className="flex-[2] py-4 bg-[#10b981] text-white font-bold rounded-full hover:bg-[#059669] shadow-lg shadow-emerald-200/40 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[11px]"
                 >
-                  <Check size={16} strokeWidth={3} /> Confirm Registration
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                  Confirm Registration
                 </button>
               </div>
             </form>

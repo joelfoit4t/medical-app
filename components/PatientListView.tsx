@@ -36,6 +36,9 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   const menuRef = useRef<HTMLDivElement>(null);
   const filterMenuRef = useRef<HTMLDivElement>(null);
 
@@ -51,6 +54,27 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const toggleSelection = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const toggleAllOnPage = (ids: string[]) => {
+    const newSelected = new Set(selectedIds);
+    const allSelected = ids.every(id => newSelected.has(id));
+    if (allSelected) {
+      ids.forEach(id => newSelected.delete(id));
+    } else {
+      ids.forEach(id => newSelected.add(id));
+    }
+    setSelectedIds(newSelected);
+  };
 
   const stats = useMemo(() => ({
     total: patients.length,
@@ -168,7 +192,12 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
             <thead>
               <tr className="border-y border-slate-200 bg-slate-50/30">
                 <th className="px-6 py-4 w-10">
-                  <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer" 
+                    checked={paginatedPatients.length > 0 && paginatedPatients.every(p => selectedIds.has(p.id))}
+                    onChange={() => toggleAllOnPage(paginatedPatients.map(p => p.id))}
+                  />
                 </th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">ID</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Name</th>
@@ -182,41 +211,53 @@ export const PatientListView: React.FC<Props> = ({ patients, setPatients, onView
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {paginatedPatients.length > 0 ? paginatedPatients.map((patient) => (
-                <tr key={patient.id} className="hover:bg-slate-50/50 transition-colors group cursor-pointer" onClick={() => onViewProfile(patient.id)}>
-                  <td className="px-6 py-5" onClick={(e) => e.stopPropagation()}>
-                    <input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500" />
-                  </td>
-                  <td className="px-6 py-5 text-sm font-medium text-slate-500 border-r border-slate-200">
-                    {patient.id.padStart(3, '0')}-{patient.gender === 'Male' ? 'A' : 'B'}
-                  </td>
-                  <td className="px-6 py-5 text-sm font-bold text-slate-800 border-r border-slate-200">
-                    {patient.name}
-                  </td>
-                  <td className="px-6 py-5 text-sm text-slate-600 border-r border-slate-200 text-center">{patient.age}</td>
-                  <td className="px-6 py-5 text-sm text-slate-600 border-r border-slate-200">
-                    (715) 794-{Math.floor(Math.random() * 8999 + 1000)}
-                  </td>
-                  <td className="px-6 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{patient.lastAppointment}</td>
-                  <td className="px-6 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">02/02/2025</td>
-                  <td className="px-6 py-5 border-r border-slate-200">
-                    <div className="flex items-center gap-2">
-                      <img src={`https://i.pravatar.cc/150?u=dr-${patient.id}`} className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" />
-                      <span className="text-sm font-medium text-slate-700">Dr. Derek Lowe</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5 text-sm text-slate-600 border-r border-slate-200">{patient.diagnosis}</td>
-                  <td className="px-6 py-5 text-right relative" onClick={(e) => e.stopPropagation()}>
-                    <button 
-                      onClick={() => setActiveMenuId(activeMenuId === patient.id ? null : patient.id)}
-                      className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      <MoreHorizontal size={20} />
-                    </button>
-                    {activeMenuId === patient.id && renderActionMenu(patient)}
-                  </td>
-                </tr>
-              )) : (
+              {paginatedPatients.length > 0 ? paginatedPatients.map((patient) => {
+                const isSelected = selectedIds.has(patient.id);
+                return (
+                  <tr 
+                    key={patient.id} 
+                    className={`transition-colors group cursor-pointer ${isSelected ? 'bg-emerald-50/40' : 'hover:bg-emerald-50/20'}`} 
+                    onClick={() => toggleSelection(patient.id)}
+                  >
+                    <td className="px-6 py-5" onClick={(e) => e.stopPropagation()}>
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer" 
+                        checked={isSelected}
+                        onChange={() => toggleSelection(patient.id)}
+                      />
+                    </td>
+                    <td className="px-6 py-5 text-sm font-medium text-slate-500 border-r border-slate-200">
+                      {patient.id.padStart(3, '0')}-{patient.gender === 'Male' ? 'A' : 'B'}
+                    </td>
+                    <td className="px-6 py-5 text-sm font-bold text-slate-800 border-r border-slate-200">
+                      {patient.name}
+                    </td>
+                    <td className="px-6 py-5 text-sm text-slate-600 border-r border-slate-200 text-center">{patient.age}</td>
+                    <td className="px-6 py-5 text-sm text-slate-600 border-r border-slate-200">
+                      (715) 794-{Math.floor(Math.random() * 8999 + 1000)}
+                    </td>
+                    <td className="px-6 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{patient.lastAppointment}</td>
+                    <td className="px-6 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">02/02/2025</td>
+                    <td className="px-6 py-5 border-r border-slate-200">
+                      <div className="flex items-center gap-2">
+                        <img src={`https://i.pravatar.cc/150?u=dr-${patient.id}`} className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" />
+                        <span className="text-sm font-medium text-slate-700">Dr. Derek Lowe</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-sm text-slate-600 border-r border-slate-200">{patient.diagnosis}</td>
+                    <td className="px-6 py-5 text-right relative" onClick={(e) => { e.stopPropagation(); }}>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === patient.id ? null : patient.id); }}
+                        className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        <MoreHorizontal size={20} />
+                      </button>
+                      {activeMenuId === patient.id && renderActionMenu(patient)}
+                    </td>
+                  </tr>
+                );
+              }) : (
                 <tr>
                   <td colSpan={10} className="px-6 py-20 text-center">
                     <div className="flex flex-col items-center gap-3 text-slate-400">
