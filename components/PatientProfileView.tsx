@@ -617,7 +617,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
       {isAddMedModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setIsAddMedModalOpen(false)} />
-          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-12">
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-12">
             <h2 className="text-4xl font-black text-[#1e293b] mb-12">Add Medication</h2>
             <form onSubmit={handleAddMedication} className="space-y-6">
               <div className="space-y-5">
@@ -663,23 +663,23 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     <input 
                       type="text" 
                       required
-                      className="w-full h-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm pr-14" 
+                      className="w-full h-full px-6 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm pr-14" 
                       value={newMedication.prescribedBy} 
                       onChange={e => setNewMedication({...newMedication, prescribedBy: e.target.value})} 
                       placeholder="Prescribed by" 
                     />
-                    <UserIcon size={20} className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none" />
+                    <UserIcon size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none" />
                   </div>
                   
                   <div className="relative h-[68px]" ref={datePickerRef}>
                     <div 
                       onClick={() => setShowDatePicker(!showDatePicker)}
-                      className="w-full h-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm cursor-pointer group flex items-center pr-14"
+                      className="w-full h-full px-6 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm cursor-pointer group flex items-center pr-14"
                     >
-                      <span className={newMedication.prescrDate ? 'text-slate-800' : 'text-slate-300'}>
+                      <span className={`whitespace-nowrap overflow-hidden text-ellipsis ${newMedication.prescrDate ? 'text-slate-800' : 'text-slate-300'}`}>
                         {newMedication.prescrDate || 'Prescription date'}
                       </span>
-                      <Calendar size={20} className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-emerald-500 transition-colors pointer-events-none" />
+                      <Calendar size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-emerald-500 transition-colors pointer-events-none" />
                     </div>
                     {showDatePicker && (
                       <MaterialDatePicker 
@@ -716,7 +716,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
       {isEditMedModalOpen && editingMedication && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setIsEditMedModalOpen(false)} />
-          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-12">
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-12">
             <h2 className="text-4xl font-black text-[#1e293b] mb-12">Edit Medication</h2>
             <form onSubmit={handleSaveMedication} className="space-y-6">
               <div className="space-y-5">
@@ -757,23 +757,23 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   <div className="relative group h-[68px]">
                     <input 
                       type="text" 
-                      className="w-full h-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm pr-14" 
+                      className="w-full h-full px-6 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm pr-14" 
                       value={editingMedication.prescribedBy} 
                       onChange={e => setEditingMedication({...editingMedication, prescribedBy: e.target.value})} 
                       placeholder="Prescribed by" 
                     />
-                    <UserIcon size={20} className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none" />
+                    <UserIcon size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none" />
                   </div>
                   
                   <div className="relative h-[68px]" ref={datePickerRef}>
                     <div 
                       onClick={() => setShowDatePicker(!showDatePicker)}
-                      className="w-full h-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm cursor-pointer group flex items-center pr-14"
+                      className="w-full h-full px-6 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all shadow-sm cursor-pointer group flex items-center pr-14"
                     >
-                      <span className={editingMedication.prescrDate ? 'text-slate-800' : 'text-slate-300'}>
+                      <span className={`whitespace-nowrap overflow-hidden text-ellipsis ${editingMedication.prescrDate ? 'text-slate-800' : 'text-slate-300'}`}>
                         {editingMedication.prescrDate || 'Prescription date'}
                       </span>
-                      <Calendar size={20} className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-emerald-500 transition-colors pointer-events-none" />
+                      <Calendar size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 group-hover:text-emerald-500 transition-colors pointer-events-none" />
                     </div>
                     {showDatePicker && (
                       <MaterialDatePicker 
