@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   Stethoscope, 
   UserRound, 
@@ -18,7 +18,11 @@ import {
   X,
   Plus,
   Check,
-  UserCircle
+  UserCircle,
+  Pencil,
+  Trash2,
+  Save,
+  Info
 } from 'lucide-react';
 import { MOCK_STAFF } from '../constants';
 import { StatCard } from './StatCard';
@@ -32,8 +36,14 @@ export const StaffListView: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   
-  // Selection state
+  // Selection & Menu state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Edit Staff State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
 
   // New Staff Form State
   const [newStaff, setNewStaff] = useState({
@@ -45,6 +55,16 @@ export const StaffListView: React.FC = () => {
   });
 
   const ITEMS_PER_PAGE = viewMode === 'list' ? 10 : 6;
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setActiveMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Selection handlers
   const toggleSelection = (id: string) => {
@@ -121,6 +141,26 @@ export const StaffListView: React.FC = () => {
     });
   };
 
+  const handleEditClick = (member: Staff) => {
+    setEditingStaff({ ...member });
+    setIsEditModalOpen(true);
+    setActiveMenuId(null);
+  };
+
+  const handleDeleteStaff = (id: string) => {
+    setStaffList(prev => prev.filter(s => s.id !== id));
+    setActiveMenuId(null);
+  };
+
+  const handleUpdateStaff = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingStaff) {
+      setStaffList(prev => prev.map(s => s.id === editingStaff.id ? editingStaff : s));
+      setIsEditModalOpen(false);
+      setEditingStaff(null);
+    }
+  };
+
   const renderStatusBadge = (status: StaffStatus) => {
     let baseStyles = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all";
     switch (status) {
@@ -143,6 +183,27 @@ export const StaffListView: React.FC = () => {
     setStatusFilter(filter);
     setCurrentPage(1);
   };
+
+  const renderActionMenu = (member: Staff) => (
+    <div 
+      ref={menuRef}
+      className="absolute right-0 top-10 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-[70] overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-200"
+    >
+      <button 
+        onClick={(e) => { e.stopPropagation(); handleEditClick(member); }} 
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+      >
+        <Pencil size={16} className="text-slate-400" /> Edit Details
+      </button>
+      <div className="h-px bg-slate-100 mx-2" />
+      <button 
+        onClick={(e) => { e.stopPropagation(); handleDeleteStaff(member.id); }} 
+        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
+      >
+        <Trash2 size={16} className="text-red-400" /> Remove Staff
+      </button>
+    </div>
+  );
 
   return (
     <div className="p-6 lg:p-8 space-y-8 relative bg-[#fcfcfc] min-h-full">
@@ -293,10 +354,14 @@ export const StaffListView: React.FC = () => {
                       <td className="px-8 py-5 text-center border-r border-slate-200">
                         {renderStatusBadge(member.status)}
                       </td>
-                      <td className="px-8 py-5 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button className="text-slate-400 hover:text-emerald-600 p-1 rounded-lg hover:bg-emerald-50 transition-all">
+                      <td className="px-8 py-5 text-right relative" onClick={(e) => e.stopPropagation()}>
+                        <button 
+                          onClick={() => setActiveMenuId(activeMenuId === member.id ? null : member.id)}
+                          className="text-slate-400 hover:text-emerald-600 p-1 rounded-lg hover:bg-emerald-50 transition-all"
+                        >
                           <MoreHorizontal size={20} />
                         </button>
+                        {activeMenuId === member.id && renderActionMenu(member)}
                       </td>
                     </tr>
                   );
@@ -324,7 +389,7 @@ export const StaffListView: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-8">
               {paginatedStaff.map((member) => (
-                <div key={member.id} className="bg-slate-50/50 border border-slate-200 rounded-[24px] p-6 hover:border-emerald-300 transition-all hover:shadow-lg group relative overflow-hidden">
+                <div key={member.id} className="bg-slate-50/50 border border-slate-200 rounded-[24px] p-6 hover:border-emerald-300 transition-all hover:shadow-lg group relative overflow-visible">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-4">
                       <div className="relative">
@@ -339,9 +404,15 @@ export const StaffListView: React.FC = () => {
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">ID: {member.id.toUpperCase()}</p>
                       </div>
                     </div>
-                    <button className="text-slate-300 hover:text-slate-500 p-1.5 transition-colors">
-                      <MoreHorizontal size={22} />
-                    </button>
+                    <div className="relative">
+                      <button 
+                        onClick={() => setActiveMenuId(activeMenuId === member.id ? null : member.id)}
+                        className="text-slate-300 hover:text-slate-500 p-1.5 transition-colors"
+                      >
+                        <MoreHorizontal size={22} />
+                      </button>
+                      {activeMenuId === member.id && renderActionMenu(member)}
+                    </div>
                   </div>
                   
                   <div className="space-y-3.5 mb-8">
@@ -440,7 +511,7 @@ export const StaffListView: React.FC = () => {
 
       {/* Add Staff Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div 
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={() => setShowAddModal(false)}
@@ -527,6 +598,117 @@ export const StaffListView: React.FC = () => {
                     <Check size={14} strokeWidth={3} />
                   </div>
                   Confirm Registration
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Staff Modal */}
+      {isEditModalOpen && editingStaff && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setIsEditModalOpen(false)}
+          />
+          <div className="bg-white rounded-[28px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in slide-in-from-bottom-8 duration-500 relative z-10">
+            <div className="bg-[#10b981] px-8 py-10 text-white relative">
+              <button 
+                onClick={() => setIsEditModalOpen(false)}
+                className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+                <Pencil size={28} />
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight">Edit Staff Member</h2>
+              <p className="text-emerald-50 text-sm mt-1 font-medium">Update profile for {editingStaff.name}</p>
+            </div>
+
+            <form onSubmit={handleUpdateStaff} className="p-8 space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Full Legal Name</label>
+                <input 
+                  type="text" 
+                  required
+                  className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-bold text-slate-700"
+                  value={editingStaff.name}
+                  onChange={e => setEditingStaff({...editingStaff, name: e.target.value})}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Primary Role</label>
+                  <select 
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all cursor-pointer appearance-none font-bold text-slate-700"
+                    value={editingStaff.role}
+                    onChange={e => setEditingStaff({...editingStaff, role: e.target.value as StaffRole})}
+                  >
+                    {Object.values(StaffRole).map(role => (
+                      <option key={role} value={role}>{role}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Department</label>
+                  <input 
+                    type="text" 
+                    required
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-bold text-slate-700"
+                    value={editingStaff.department}
+                    onChange={e => setEditingStaff({...editingStaff, department: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                <input 
+                  type="email" 
+                  required
+                  className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-bold text-slate-700"
+                  value={editingStaff.email}
+                  onChange={e => setEditingStaff({...editingStaff, email: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Schedule</label>
+                <input 
+                  type="text" 
+                  required
+                  className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-bold text-slate-700"
+                  value={editingStaff.schedule}
+                  onChange={e => setEditingStaff({...editingStaff, schedule: e.target.value})}
+                />
+              </div>
+
+              <div className="bg-emerald-50/40 p-4 rounded-2xl border border-emerald-100/50 flex items-start gap-4">
+                 <div className="text-emerald-500 mt-0.5 shrink-0 bg-white p-1 rounded-full shadow-sm">
+                   <Info size={16} />
+                 </div>
+                 <p className="text-xs text-emerald-700/80 font-bold leading-relaxed">
+                   Changes to staff profiles will reflect immediately in the clinic directory and on-call schedules.
+                 </p>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="flex-1 py-4 bg-slate-100 text-slate-400 font-bold rounded-full hover:bg-slate-200 hover:text-slate-600 transition-all uppercase tracking-widest text-[11px]"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-[2] py-4 bg-[#10b981] text-white font-bold rounded-full hover:bg-[#059669] shadow-lg shadow-emerald-200/40 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[11px]"
+                >
+                  <Save size={18} />
+                  Save Changes
                 </button>
               </div>
             </form>

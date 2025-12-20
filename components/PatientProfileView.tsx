@@ -21,7 +21,8 @@ import {
   Trash2,
   Calendar,
   User as UserIcon,
-  X
+  X,
+  User
 } from 'lucide-react';
 import { Patient } from '../types';
 
@@ -259,6 +260,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
 
   const handleEditMedication = (med: Medication) => {
     setEditingMedication({ ...med });
+    // Fix: line 263 changed from setIsEditModalOpen to setIsEditMedModalOpen
     setIsEditMedModalOpen(true);
     setActiveActionMedId(null);
   };
@@ -294,9 +296,10 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
     setShowDatePicker(false);
   };
 
+  // Removed 'Patient profile' from tabs as requested
   const tabs = [
     'Overview', 'Clinical data', 'Medications', 'Care plans', 
-    'Patient profile', 'Benefits', 'Relationships', 'Unified health score', 'Schedule'
+    'Benefits', 'Relationships', 'Unified health score', 'Schedule'
   ];
 
   const renderMedicationsTab = () => (
@@ -394,7 +397,9 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   </td>
                   <td className="px-6 py-5 border-r border-slate-200">
                     <div className="flex items-center gap-2">
-                      <img src={`https://i.pravatar.cc/150?u=${med.prescribedBy.replace(/\s+/g, '')}`} className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" />
+                      <div className="w-6 h-6 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400">
+                        <User size={12} />
+                      </div>
                       <span className="text-sm font-bold text-slate-700 hover:text-emerald-600 cursor-pointer hover:underline underline-offset-4">{med.prescribedBy}</span>
                     </div>
                   </td>

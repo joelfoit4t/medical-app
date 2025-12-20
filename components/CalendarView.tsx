@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -12,10 +11,10 @@ import {
   Check,
   User,
   CalendarDays,
-  Pencil,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
+  Pencil, 
+  Trash2, 
+  ChevronUp, 
+  ChevronDown, 
   Plus
 } from 'lucide-react';
 import { TIME_SLOTS } from '../constants';
@@ -110,8 +109,8 @@ const MaterialDatePicker: React.FC<{
               onClick={() => handleDateClick(item.date)}
               className={`
                 h-8 w-8 rounded-full text-[11px] font-bold transition-all mx-auto flex items-center justify-center
-                ${!item.current ? 'text-slate-300' : isSelected ? 'bg-[#3b82f6] text-white' : 'text-slate-600 hover:bg-slate-50'}
-                ${isToday && !isSelected ? 'border border-[#3b82f6] text-[#3b82f6]' : ''}
+                ${!item.current ? 'text-slate-300' : isSelected ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50'}
+                ${isToday && !isSelected ? 'border border-emerald-500 text-emerald-500' : ''}
               `}
             >
               {item.day}
@@ -121,8 +120,103 @@ const MaterialDatePicker: React.FC<{
       </div>
 
       <div className="flex items-center justify-between mt-4 pt-2 border-t border-slate-50">
-        <button type="button" onClick={() => { onChange(''); onClose(); }} className="text-[11px] font-bold text-[#3b82f6] px-2 py-1 hover:bg-blue-50 rounded transition-colors uppercase">Clear</button>
-        <button type="button" onClick={() => handleDateClick(new Date())} className="text-[11px] font-bold text-[#3b82f6] px-2 py-1 hover:bg-blue-50 rounded transition-colors uppercase">Today</button>
+        <button type="button" onClick={() => { onChange(''); onClose(); }} className="text-[11px] font-bold text-emerald-600 px-2 py-1 hover:bg-emerald-50 rounded transition-colors uppercase">Clear</button>
+        <button type="button" onClick={() => handleDateClick(new Date())} className="text-[11px] font-bold text-emerald-600 px-2 py-1 hover:bg-emerald-50 rounded transition-colors uppercase">Today</button>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Custom Material UI Time Picker Component
+ * Adjust position for modal use cases (open upwards)
+ */
+const MaterialTimePicker: React.FC<{
+  value: string;
+  onChange: (val: string) => void;
+  onClose: () => void;
+  openUpwards?: boolean;
+}> = ({ value, onChange, onClose, openUpwards = false }) => {
+  const parseValue = (val: string) => {
+    if (!val) return { hh: '09', mm: '00', period: 'AM' };
+    const [hStr, mStr] = val.split(':');
+    let h = parseInt(hStr);
+    const mm = mStr;
+    const period = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    return { hh: String(h).padStart(2, '0'), mm, period };
+  };
+
+  const { hh: selectedH, mm: selectedM, period: selectedP } = parseValue(value);
+
+  const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+  const periods = ['AM', 'PM'];
+
+  const handleSelect = (hh: string, mm: string, p: string) => {
+    let h = parseInt(hh);
+    if (p === 'PM' && h < 12) h += 12;
+    if (p === 'AM' && h === 12) h = 0;
+    const timeValue = `${String(h).padStart(2, '0')}:${mm}`;
+    onChange(timeValue);
+  };
+
+  const positionClasses = openUpwards 
+    ? "absolute bottom-full left-0 mb-2 origin-bottom-left" 
+    : "absolute top-full left-0 mt-2 origin-top-left";
+
+  return (
+    <div className={`${positionClasses} bg-white rounded-3xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.2)] border border-slate-100 z-[160] w-[240px] overflow-hidden animate-in fade-in zoom-in-95 duration-200`}>
+      <div className="grid grid-cols-3 h-[280px]">
+        {/* Hours */}
+        <div className="overflow-y-auto custom-scrollbar border-r border-slate-50 py-2">
+          {hours.map(h => (
+            <button
+              key={h}
+              type="button"
+              onClick={() => handleSelect(h, selectedM, selectedP)}
+              className={`w-full py-2.5 text-xs font-bold transition-all ${h === selectedH ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              {h}
+            </button>
+          ))}
+        </div>
+        {/* Minutes */}
+        <div className="overflow-y-auto custom-scrollbar border-r border-slate-50 py-2">
+          {minutes.map(m => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => handleSelect(selectedH, m, selectedP)}
+              className={`w-full py-2.5 text-xs font-bold transition-all ${m === selectedM ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+        {/* Periods */}
+        <div className="py-2">
+          {periods.map(p => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => handleSelect(selectedH, selectedM, p)}
+              className={`w-full py-2.5 text-xs font-bold transition-all ${p === selectedP ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="p-3 bg-slate-50 flex justify-end">
+        <button 
+          onClick={onClose}
+          type="button"
+          className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-800 transition-colors px-3 py-1"
+        >
+          Done
+        </button>
       </div>
     </div>
   );
@@ -138,6 +232,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [showModalDatePicker, setShowModalDatePicker] = useState(false);
+  const [showEditTimePicker, setShowEditTimePicker] = useState(false);
   
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<'All' | AppointmentStatus>('All');
@@ -146,6 +241,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
   const menuRef = useRef<HTMLDivElement>(null);
   const filterMenuRef = useRef<HTMLDivElement>(null);
   const modalDateRef = useRef<HTMLDivElement>(null);
+  const editTimePickerRef = useRef<HTMLDivElement>(null);
   const [currentDate, setCurrentDate] = useState(new Date(2025, 3, 22));
 
   const START_HOUR = 9;
@@ -161,6 +257,9 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
       }
       if (modalDateRef.current && !modalDateRef.current.contains(event.target as Node)) {
         setShowModalDatePicker(false);
+      }
+      if (editTimePickerRef.current && !editTimePickerRef.current.contains(event.target as Node)) {
+        setShowEditTimePicker(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -186,6 +285,16 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
     if (!dateStr) return '';
     const [y, m, d] = dateStr.split('-');
     return `${m}/${d}/${y}`;
+  };
+
+  const formatTimeDisplay = (timeStr: string) => {
+    if (!timeStr) return '--:-- --';
+    const [hStr, mStr] = timeStr.split(':');
+    let h = parseInt(hStr);
+    const period = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${String(h).padStart(2, '0')}:${mStr} ${period}`;
   };
 
   const getWeekDays = useMemo(() => {
@@ -341,8 +450,8 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Date</th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Time</th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Appointed doctor</th>
-                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Reason</th>
-                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Status</th>
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Reason for visit</th>
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Visit status</th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
                     </tr>
                   </thead>
@@ -356,7 +465,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                           <td className="px-8 py-5 text-sm font-bold text-slate-800 border-r border-slate-200">{apt.patientName}</td>
                           <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{apt.date}</td>
                           <td className="px-8 py-5 text-sm text-slate-500 border-r border-slate-200 text-center">{apt.startTime}</td>
-                          <td className="px-8 py-5 border-r border-slate-200"><div className="flex items-center gap-2"><img src={`https://i.pravatar.cc/150?u=dr-${apt.id}`} className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" /><span className="text-sm font-medium text-slate-700">Dr. Lily Cooper</span></div></td>
+                          <td className="px-8 py-5 border-r border-slate-200"><div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400"><User size={12} /></div><span className="text-sm font-medium text-slate-700">Dr. Lily Cooper</span></div></td>
                           <td className="px-8 py-5 text-sm text-slate-600 font-medium border-r border-slate-200">{apt.reason}</td>
                           <td className="px-8 py-5 text-center border-r border-slate-200">{renderStatusBadge(apt.status)}</td>
                           <td className="px-8 py-5 text-right relative" onClick={(e) => e.stopPropagation()}>
@@ -388,7 +497,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
       {isEditModalOpen && editingAppointment && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setIsEditModalOpen(false)} />
-          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-10">
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-10">
             <h2 className="text-3xl font-bold text-[#1e293b] mb-10">Edit Appointment</h2>
             <form onSubmit={handleSaveEdit} className="space-y-6">
               <div className="space-y-5">
@@ -407,7 +516,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                   className="w-full px-7 py-5 bg-slate-50 border border-slate-100 rounded-[20px] text-base font-semibold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
                   value={editingAppointment.reason} 
                   onChange={e => setEditingAppointment({...editingAppointment, reason: e.target.value})} 
-                  placeholder="Holiday Health" 
+                  placeholder="Reason for Visit" 
                 />
                 
                 {/* Date and Status Row */}
@@ -443,17 +552,26 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                   </div>
                 </div>
 
-                {/* Time Row */}
-                <div className="relative">
-                  <div className="w-full px-7 py-5 bg-slate-50 border border-slate-100 rounded-[20px] text-base font-semibold text-slate-800 flex items-center justify-between">
-                    <input 
-                      type="time"
-                      className="bg-transparent focus:outline-none w-full"
-                      value={editingAppointment.startTime}
-                      onChange={e => setEditingAppointment({...editingAppointment, startTime: e.target.value})}
-                    />
-                    <Clock size={18} className="text-slate-400" />
+                {/* Time Row with MaterialTimePicker opening Upwards */}
+                <div className="relative" ref={editTimePickerRef}>
+                  <div 
+                    onClick={() => setShowEditTimePicker(!showEditTimePicker)}
+                    className="w-full px-7 py-5 bg-slate-50 border border-slate-100 rounded-[20px] text-base font-semibold text-slate-800 flex items-center justify-between cursor-pointer hover:bg-white transition-all group"
+                  >
+                    <span>{formatTimeDisplay(editingAppointment.startTime)}</span>
+                    <div className="flex items-center gap-2">
+                      <Clock size={18} className="text-slate-400 group-hover:text-emerald-500 transition-colors" />
+                      <ChevronDown size={14} className={`text-slate-300 transition-transform ${showEditTimePicker ? 'rotate-180' : ''}`} />
+                    </div>
                   </div>
+                  {showEditTimePicker && (
+                    <MaterialTimePicker 
+                      value={editingAppointment.startTime} 
+                      onChange={(val) => setEditingAppointment({...editingAppointment, startTime: val})} 
+                      onClose={() => setShowEditTimePicker(false)}
+                      openUpwards={true}
+                    />
+                  )}
                 </div>
               </div>
 
