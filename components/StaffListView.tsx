@@ -22,7 +22,9 @@ import {
   Pencil,
   Trash2,
   Save,
-  Info
+  Info,
+  Filter,
+  RotateCcw
 } from 'lucide-react';
 import { MOCK_STAFF } from '../constants';
 import { StatCard } from './StatCard';
@@ -33,13 +35,16 @@ export const StaffListView: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | StaffStatus>('All');
+  const [roleFilter, setRoleFilter] = useState<'All' | StaffRole>('All');
   const [showAddModal, setShowAddModal] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [isFilterPopupOpen, setIsFilterPopupOpen] = useState(false);
   
   // Selection & Menu state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const filterPopupRef = useRef<HTMLDivElement>(null);
 
   // Edit Staff State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -60,6 +65,9 @@ export const StaffListView: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setActiveMenuId(null);
+      }
+      if (filterPopupRef.current && !filterPopupRef.current.contains(event.target as Node)) {
+        setIsFilterPopupOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -88,7 +96,7 @@ export const StaffListView: React.FC = () => {
     setSelectedIds(newSelected);
   };
 
-  // Filter staff based on search query and status filter
+  // Filter staff based on search query, status filter, and role filter
   const filteredStaff = useMemo(() => {
     return staffList.filter(member => {
       const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,10 +104,11 @@ export const StaffListView: React.FC = () => {
         member.department.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesStatus = statusFilter === 'All' || member.status === statusFilter;
+      const matchesRole = roleFilter === 'All' || member.role === roleFilter;
       
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesStatus && matchesRole;
     });
-  }, [searchQuery, statusFilter, staffList]);
+  }, [searchQuery, statusFilter, roleFilter, staffList]);
 
   const totalPages = Math.ceil(filteredStaff.length / ITEMS_PER_PAGE) || 1;
 
@@ -184,6 +193,13 @@ export const StaffListView: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const clearAllFilters = () => {
+    setStatusFilter('All');
+    setRoleFilter('All');
+    setSearchQuery('');
+    setCurrentPage(1);
+  };
+
   const renderActionMenu = (member: Staff) => (
     <div 
       ref={menuRef}
@@ -261,9 +277,94 @@ export const StaffListView: React.FC = () => {
                 className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 w-64 transition-all"
               />
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 font-bold hover:bg-slate-50 transition-colors">
-              <SlidersHorizontal size={14} /> Filter
-            </button>
+            
+            {/* Filter Button & Popup */}
+            <div className="relative" ref={filterPopupRef}>
+              <button 
+                onClick={() => setIsFilterPopupOpen(!isFilterPopupOpen)}
+                className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold border transition-all ${
+                  isFilterPopupOpen || statusFilter !== 'All' || roleFilter !== 'All'
+                    ? 'bg-emerald-50 border-emerald-500 text-emerald-600 shadow-sm'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <SlidersHorizontal size={14} /> Filter
+                {(statusFilter !== 'All' || roleFilter !== 'All') && (
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                )}
+              </button>
+
+              {isFilterPopupOpen && (
+                <div className="absolute left-0 top-[calc(100%+8px)] w-80 bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-slate-100 z-[80] overflow-hidden p-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-center justify-between mb-6">
+                    <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Advanced Filters</h4>
+                    <button 
+                      onClick={clearAllFilters}
+                      className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 flex items-center gap-1"
+                    >
+                      <RotateCcw size={12} /> Clear
+                    </button>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Status Filter Group */}
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Work Status</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['All', ...Object.values(StaffStatus)].map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => {
+                              setStatusFilter(s as any);
+                              setCurrentPage(1);
+                            }}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                              statusFilter === s
+                                ? 'bg-emerald-500 text-white shadow-md shadow-emerald-100'
+                                : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                            }`}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Role Filter Group */}
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Professional Role</p>
+                      <div className="flex flex-wrap gap-2">
+                        {['All', ...Object.values(StaffRole)].map((r) => (
+                          <button
+                            key={r}
+                            onClick={() => {
+                              setRoleFilter(r as any);
+                              setCurrentPage(1);
+                            }}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                              roleFilter === r
+                                ? 'bg-slate-800 text-white shadow-md shadow-slate-200'
+                                : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                            }`}
+                          >
+                            {r}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-4 border-t border-slate-50">
+                    <button 
+                      onClick={() => setIsFilterPopupOpen(false)}
+                      className="w-full py-3 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             
             {/* View Toggle Buttons */}
             <div className="flex bg-slate-100 p-1 rounded-xl ml-2">
@@ -370,16 +471,14 @@ export const StaffListView: React.FC = () => {
                     <td colSpan={9} className="px-8 py-20 text-center">
                       <div className="flex flex-col items-center gap-3 text-slate-400">
                         <UserRound size={48} strokeWidth={1} />
-                        <p className="text-lg font-bold text-slate-600">No staff found</p>
+                        <p className="text-lg font-bold text-slate-600">No staff found matching filters</p>
                         <p className="text-sm">Try adjusting your search or category filters.</p>
-                        {statusFilter !== 'All' && (
-                          <button 
-                            onClick={() => handleFilterClick('All')}
-                            className="text-emerald-500 text-sm font-bold mt-2 hover:underline"
-                          >
-                            Reset Category Filter
-                          </button>
-                        )}
+                        <button 
+                          onClick={clearAllFilters}
+                          className="text-emerald-500 text-sm font-bold mt-2 hover:underline"
+                        >
+                          Reset All Filters
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -444,15 +543,13 @@ export const StaffListView: React.FC = () => {
                 <div className="col-span-full py-20 text-center">
                   <div className="flex flex-col items-center gap-3 text-slate-400">
                     <UserRound size={48} strokeWidth={1} />
-                    <p className="text-lg font-bold text-slate-600">No staff found</p>
-                    {statusFilter !== 'All' && (
-                      <button 
-                        onClick={() => handleFilterClick('All')}
-                        className="text-emerald-500 text-sm font-bold mt-2 hover:underline"
-                      >
-                        Reset Category Filter
-                      </button>
-                    )}
+                    <p className="text-lg font-bold text-slate-600">No staff found matching filters</p>
+                    <button 
+                      onClick={clearAllFilters}
+                      className="text-emerald-500 text-sm font-bold mt-2 hover:underline"
+                    >
+                      Reset All Filters
+                    </button>
                   </div>
                 </div>
               )}

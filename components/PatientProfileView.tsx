@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ArrowLeft, 
@@ -140,6 +139,7 @@ const MaterialDatePicker: React.FC<{
     const dCount = daysInMonth(viewDate.getMonth(), viewDate.getFullYear());
     const startDay = startDayOfMonth(viewDate.getMonth(), viewDate.getFullYear());
     const prevMonthDays = daysInMonth(viewDate.getMonth() - 1, viewDate.getFullYear());
+    
     const arr = [];
     for (let i = startDay - 1; i >= 0; i--) arr.push({ day: prevMonthDays - i, current: false, date: new Date(year, viewDate.getMonth() - 1, prevMonthDays - i) });
     for (let i = 1; i <= dCount; i++) arr.push({ day: i, current: true, date: new Date(year, viewDate.getMonth(), i) });
@@ -655,14 +655,14 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     </button>
                   </div>
                 </div>
-                {/* Updated Doctor's or Nurse's Name Field */}
+                {/* Updated Staff Name Field */}
                 <div className="relative group">
                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors">
                       <UserIcon size={16} />
                    </div>
                    <input 
                       type="text" 
-                      placeholder="Doctor's or Nurse's name..." 
+                      placeholder="Staff's name..." 
                       className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
                       value={evalDoctorName}
                       onChange={(e) => setEvalDoctorName(e.target.value)}
