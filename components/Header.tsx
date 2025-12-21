@@ -17,9 +17,10 @@ interface Props {
   onMenuClick: () => void;
   language: Language;
   onLanguageChange: (lang: Language) => void;
+  onLogout: () => void;
 }
 
-export const Header: React.FC<Props> = ({ activeNav, onMenuClick, language, onLanguageChange }) => {
+export const Header: React.FC<Props> = ({ activeNav, onMenuClick, language, onLanguageChange, onLogout }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -167,7 +168,10 @@ export const Header: React.FC<Props> = ({ activeNav, onMenuClick, language, onLa
                 
                 <div className="h-px bg-slate-100 mx-4 my-1" />
                 
-                <button className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-50 transition-all group text-left">
+                <button 
+                  onClick={onLogout}
+                  className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-50 transition-all group text-left"
+                >
                   <div className="w-10 h-10 bg-slate-100/50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-red-500 transition-colors shrink-0">
                     <LogOut size={20} />
                   </div>

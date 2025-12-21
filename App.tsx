@@ -7,10 +7,15 @@ import { PatientProfileView } from './components/PatientProfileView';
 import { AddPatientView } from './components/AddPatientView';
 import { AddAppointmentView } from './components/AddAppointmentView';
 import { StaffListView } from './components/StaffListView';
+import { SignInView } from './components/SignInView';
+import { SignUpView } from './components/SignUpView';
+import { ForgotPasswordView } from './components/ForgotPasswordView';
 import { NavItem, Patient, Appointment, Language } from './types';
 import { MOCK_PATIENTS, MOCK_APPOINTMENTS } from './constants';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'forgot-password'>('signin');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<NavItem>('Appointment List');
   const [language, setLanguage] = useState<Language>('EN');
@@ -37,6 +42,16 @@ function App() {
   const handleNavigateToProfile = (patientId: string) => {
     setSelectedPatientId(patientId);
     setActiveNav('Patient Profile');
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setAuthMode('signin');
+  };
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    setActiveNav('Appointment List');
   };
 
   const renderContent = () => {
@@ -90,7 +105,7 @@ function App() {
           />
         );
       case 'Staff':
-        return <StaffListView language={language} />;
+        return <StaffListView />;
       case 'Dashboard':
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 h-[calc(100vh-64px)]">
@@ -114,6 +129,31 @@ function App() {
     }
   };
 
+  if (!isAuthenticated) {
+    if (authMode === 'signup') {
+      return (
+        <SignUpView 
+          onSignUp={handleLogin} 
+          onSignInClick={() => setAuthMode('signin')} 
+        />
+      );
+    }
+    if (authMode === 'forgot-password') {
+      return (
+        <ForgotPasswordView 
+          onBackClick={() => setAuthMode('signin')} 
+        />
+      );
+    }
+    return (
+      <SignInView 
+        onSignIn={handleLogin} 
+        onSignUpClick={() => setAuthMode('signup')}
+        onForgotPasswordClick={() => setAuthMode('forgot-password')}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar 
@@ -133,6 +173,7 @@ function App() {
           onMenuClick={() => setIsSidebarOpen(true)} 
           language={language}
           onLanguageChange={setLanguage}
+          onLogout={handleLogout}
         />
         
         <main className="lg:pl-64 pt-16 flex-1 overflow-y-auto bg-[#fcfcfc]">
