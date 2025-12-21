@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { SIDEBAR_ITEMS } from '../constants';
 import { Plus, X, ChevronDown } from 'lucide-react';
-import { NavItem } from '../types';
+import { NavItem, Language } from '../types';
+import { useTranslation } from '../i18n/translations';
 
 interface Props {
   isOpen: boolean;
   activeItem: NavItem;
   onNavigate: (item: NavItem) => void;
   onClose: () => void;
+  language: Language;
 }
 
-export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClose }) => {
+export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClose, language }) => {
   const isPatientModule = activeItem === 'Patient' || activeItem === 'Patient List' || activeItem === 'Patient Profile' || activeItem === 'Add Patient';
   const isAppointmentModule = activeItem === 'Appointment' || activeItem === 'Appointment List' || activeItem === 'Add Appointment';
+  const t = useTranslation(language);
   
   const [isPatientExpanded, setIsPatientExpanded] = useState(isPatientModule);
   const [isAppointmentExpanded, setIsAppointmentExpanded] = useState(isAppointmentModule);
@@ -33,11 +36,9 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
     { label: 'Add Appointment', active: activeItem === 'Add Appointment' },
   ];
 
-  const getLineStyles = (activeSubItem: NavItem, subItems: any[]) => {
-    const activeIndex = subItems.findIndex(item => item.label === activeSubItem);
-    if (activeIndex === -1) return { top: 'bg-emerald-500', bottom: 'bg-slate-100' };
-    if (activeIndex === subItems.length - 1) return { top: 'bg-emerald-500', bottom: 'bg-emerald-500' };
-    return { top: 'bg-emerald-500', bottom: 'bg-slate-100' };
+  const getTranslated = (label: string) => {
+    const key = label.toLowerCase().replace(/ /g, '') as any;
+    return t(key);
   };
 
   return (
@@ -59,7 +60,7 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
         </button>
       </div>
 
-      <nav className="px-4 py-2 space-y-1">
+      <nav className="px-4 py-2 space-y-2">
         {SIDEBAR_ITEMS.map((item, index) => {
           const isPatientItem = item.label === 'Patient';
           const isAppointmentItem = item.label === 'Appointment';
@@ -69,6 +70,7 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
           if (isAppointmentItem) isActive = isAppointmentModule;
 
           const isExpanded = isPatientItem ? isPatientExpanded : (isAppointmentItem ? isAppointmentExpanded : false);
+          const translatedLabel = getTranslated(item.label);
 
           return (
             <div key={index} className="space-y-1">
@@ -86,13 +88,13 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
                 }}
                 className={`flex w-full items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-white text-slate-900 shadow-[0px_4px_12px_rgba(0,0,0,0.06)] border-2 border-emerald-500'
+                    ? 'bg-white text-emerald-600 shadow-[0px_4px_12px_rgba(0,0,0,0.06)] border-2 border-emerald-500'
                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 border-2 border-transparent'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <item.icon size={20} className={isActive ? 'text-emerald-500' : 'text-slate-400'} />
-                  <span className={isActive ? 'text-emerald-600' : ''}>{item.label}</span>
+                  <span className={isActive ? 'text-emerald-600 font-bold' : ''}>{translatedLabel}</span>
                 </div>
                 {(isPatientItem || isAppointmentItem) && (
                   <ChevronDown size={14} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -100,29 +102,30 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
               </button>
 
               {/* Patient Sub-navigation */}
-              {isPatientItem && isPatientExpanded && (
-                <div className="ml-9 mt-1 mb-2 relative flex flex-col space-y-4">
-                  <div className="absolute left-0 top-0 bottom-0 w-[2px] ml-[-1px]">
-                    <div className={`h-1/2 w-full ${getLineStyles(activeItem, patientSubItems).top}`}></div>
-                    <div className={`h-1/2 w-full ${getLineStyles(activeItem, patientSubItems).bottom}`}></div>
-                  </div>
+              {isPatientItem && isExpanded && (
+                <div className="ml-10 mt-1 mb-2 relative flex flex-col space-y-4 py-2">
+                  <div className="absolute left-[0.5px] top-0 bottom-0 w-[1.5px] bg-slate-100"></div>
                   {patientSubItems.map((sub, idx) => (
                     <div 
                       key={idx} 
                       onClick={() => onNavigate(sub.label)}
                       className="relative flex items-center group cursor-pointer pl-6 h-6"
                     >
-                      <div className={`absolute left-[-5px] w-2.5 h-2.5 rounded-full border-2 bg-white transition-all duration-300 z-10 ${
+                      {/* Vertical highlight line for active section segment */}
+                      {sub.active && (
+                        <div className="absolute left-[0.5px] top-[-10px] bottom-[-10px] w-[1.5px] bg-emerald-500 z-10"></div>
+                      )}
+                      <div className={`absolute left-[-4px] w-2.5 h-2.5 rounded-full border-2 bg-white transition-all duration-300 z-20 ${
                         sub.active 
-                          ? 'border-emerald-500 ring-4 ring-emerald-50 scale-125' 
+                          ? 'border-emerald-500 bg-emerald-500 ring-4 ring-emerald-50' 
                           : 'border-slate-200 group-hover:border-slate-300'
                       }`}>
-                         {sub.active && <div className="w-1 h-1 bg-emerald-500 rounded-full absolute inset-0 m-auto"></div>}
+                         {sub.active && <div className="w-1 h-1 bg-white rounded-full absolute inset-0 m-auto"></div>}
                       </div>
                       <span className={`text-sm font-medium transition-colors ${
-                        sub.active ? 'text-slate-900 font-bold' : 'text-slate-500 hover:text-slate-700'
+                        sub.active ? 'text-slate-900 font-bold' : 'text-slate-400 hover:text-slate-600'
                       }`}>
-                        {sub.label}
+                        {getTranslated(sub.label)}
                       </span>
                     </div>
                   ))}
@@ -130,29 +133,29 @@ export const Sidebar: React.FC<Props> = ({ isOpen, activeItem, onNavigate, onClo
               )}
 
               {/* Appointment Sub-navigation */}
-              {isAppointmentItem && isAppointmentExpanded && (
-                <div className="ml-9 mt-1 mb-2 relative flex flex-col space-y-4">
-                  <div className="absolute left-0 top-0 bottom-0 w-[2px] ml-[-1px]">
-                    <div className={`h-1/2 w-full ${getLineStyles(activeItem, appointmentSubItems).top}`}></div>
-                    <div className={`h-1/2 w-full ${getLineStyles(activeItem, appointmentSubItems).bottom}`}></div>
-                  </div>
+              {isAppointmentItem && isExpanded && (
+                <div className="ml-10 mt-1 mb-2 relative flex flex-col space-y-4 py-2">
+                  <div className="absolute left-[0.5px] top-0 bottom-0 w-[1.5px] bg-slate-100"></div>
                   {appointmentSubItems.map((sub, idx) => (
                     <div 
                       key={idx} 
                       onClick={() => onNavigate(sub.label)}
                       className="relative flex items-center group cursor-pointer pl-6 h-6"
                     >
-                      <div className={`absolute left-[-5px] w-2.5 h-2.5 rounded-full border-2 bg-white transition-all duration-300 z-10 ${
+                      {sub.active && (
+                        <div className="absolute left-[0.5px] top-[-10px] bottom-[-10px] w-[1.5px] bg-emerald-500 z-10"></div>
+                      )}
+                      <div className={`absolute left-[-4px] w-2.5 h-2.5 rounded-full border-2 bg-white transition-all duration-300 z-20 ${
                         sub.active 
-                          ? 'border-emerald-500 ring-4 ring-emerald-50 scale-125' 
+                          ? 'border-emerald-500 bg-emerald-500 ring-4 ring-emerald-50' 
                           : 'border-slate-200 group-hover:border-slate-300'
                       }`}>
-                         {sub.active && <div className="w-1 h-1 bg-emerald-500 rounded-full absolute inset-0 m-auto"></div>}
+                         {sub.active && <div className="w-1 h-1 bg-white rounded-full absolute inset-0 m-auto"></div>}
                       </div>
                       <span className={`text-sm font-medium transition-colors ${
-                        sub.active ? 'text-slate-900 font-bold' : 'text-slate-500 hover:text-slate-700'
+                        sub.active ? 'text-slate-900 font-bold' : 'text-slate-400 hover:text-slate-600'
                       }`}>
-                        {sub.label}
+                        {getTranslated(sub.label)}
                       </span>
                     </div>
                   ))}

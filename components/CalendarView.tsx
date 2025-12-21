@@ -19,7 +19,8 @@ import {
 } from 'lucide-react';
 import { TIME_SLOTS } from '../constants';
 import { AppointmentCard } from './AppointmentCard';
-import { AppointmentStatus, Appointment } from '../types';
+import { AppointmentStatus, Appointment, Language } from '../types';
+import { useTranslation } from '../i18n/translations';
 
 type ViewType = 'calendar' | 'list';
 
@@ -28,6 +29,7 @@ interface Props {
   onUpdateAppointment: (apt: Appointment) => void;
   onDeleteAppointment: (id: string) => void;
   onAddAppointment: () => void;
+  language: Language;
 }
 
 /**
@@ -222,11 +224,12 @@ const MaterialTimePicker: React.FC<{
   );
 };
 
-export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointment, onDeleteAppointment, onAddAppointment }) => {
+export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointment, onDeleteAppointment, onAddAppointment, language }) => {
   const [viewType, setViewType] = useState<ViewType>('list');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
+  const t = useTranslation(language);
 
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -362,8 +365,8 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
   const renderStatusBadge = (status: AppointmentStatus) => {
     let baseStyles = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold transition-all";
     switch (status) {
-      case AppointmentStatus.Completed: return <span className={`${baseStyles} bg-emerald-50 text-emerald-600`}><Check size={12} /> Completed</span>;
-      case AppointmentStatus.Canceled: return <span className={`${baseStyles} bg-red-50 text-red-600`}><X size={12} /> Canceled</span>;
+      case AppointmentStatus.Completed: return <span className={`${baseStyles} bg-emerald-50 text-emerald-600`}><Check size={12} /> {t('confirm')}</span>;
+      case AppointmentStatus.Canceled: return <span className={`${baseStyles} bg-red-50 text-red-600`}><X size={12} /> {t('delete')}</span>;
       case AppointmentStatus.Waiting: return <span className={`${baseStyles} bg-amber-50 text-amber-600`}><User size={12} /> Waiting</span>;
       default: return <span className={`${baseStyles} bg-emerald-50 text-emerald-600`}><Clock size={12} /> Scheduled</span>;
     }
@@ -381,7 +384,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
         {viewType === 'calendar' && (
           <div className="flex items-center gap-2 relative">
             <button onClick={() => navigateDate('prev')} className="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100"><ChevronLeft size={20} /></button>
-            <button onClick={() => setShowDatePicker(!showDatePicker)} className="px-5 py-2 hover:bg-slate-100 rounded-full text-sm text-slate-700 font-bold">{currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</button>
+            <button onClick={() => setShowDatePicker(!showDatePicker)} className="px-5 py-2 hover:bg-slate-100 rounded-full text-sm text-slate-700 font-bold">{currentDate.toLocaleDateString(language === 'EN' ? 'en-US' : 'fr-FR', { month: 'long', day: 'numeric', year: 'numeric' })}</button>
             <button onClick={() => navigateDate('next')} className="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100"><ChevronRight size={20} /></button>
           </div>
         )}
@@ -424,9 +427,9 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                     <button onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)} className={`w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 transition-all ${isFilterMenuOpen ? 'bg-emerald-50 text-emerald-600 border-emerald-500' : 'text-slate-500 hover:bg-slate-50'}`}><SlidersHorizontal size={20} /></button>
                     {isFilterMenuOpen && (
                       <div className="absolute left-0 top-12 w-56 bg-white rounded-2xl shadow-2xl border border-slate-200 z-[60] overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="px-4 py-2 border-b border-slate-200 mb-1"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Filter status</p></div>
+                        <div className="px-4 py-2 border-b border-slate-200 mb-1"><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('filter')}</p></div>
                         {[
-                          { label: 'All Appointments', value: 'All', icon: CalendarDays, color: 'text-slate-400' },
+                          { label: t('appointmentlist'), value: 'All', icon: CalendarDays, color: 'text-slate-400' },
                           { label: 'Scheduled', value: AppointmentStatus.Scheduled, icon: Clock, color: 'text-emerald-500' },
                           { label: 'Completed', value: AppointmentStatus.Completed, icon: Check, color: 'text-emerald-600' },
                           { label: 'Waiting', value: AppointmentStatus.Waiting, icon: User, color: 'text-amber-500' },
@@ -438,7 +441,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                     )}
                   </div>
                 </div>
-                <button onClick={onAddAppointment} className="flex items-center gap-2 px-6 py-3 bg-[#10b981] text-white rounded-xl text-sm font-bold hover:bg-[#059669] transition-all shadow-lg shadow-emerald-100"><Plus size={18} /> Add appointment</button>
+                <button onClick={onAddAppointment} className="flex items-center gap-2 px-6 py-3 bg-[#10b981] text-white rounded-xl text-sm font-bold hover:bg-[#059669] transition-all shadow-lg shadow-emerald-100"><Plus size={18} /> {t('addappointment')}</button>
              </div>
              <div className="overflow-x-auto flex-1">
                 <table className="w-full text-left border-collapse">
@@ -446,13 +449,13 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                     <tr className="border-y border-slate-200 bg-slate-50/30">
                       <th className="px-8 py-4 w-10 border-r border-slate-200"><input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer" checked={paginatedAppointments.length > 0 && paginatedAppointments.every(apt => selectedIds.has(apt.id))} onChange={() => toggleAllOnPage(paginatedAppointments.map(apt => apt.id))} /></th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">ID</th>
-                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Patient Name</th>
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">{t('patientname')}</th>
                       <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Date</th>
-                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Time</th>
-                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Appointed doctor</th>
-                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Reason for visit</th>
-                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">Visit status</th>
-                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">{t('starttime')}</th>
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">Doctor</th>
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200">{t('reasonforvisit')}</th>
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-200 text-center">{t('status')}</th>
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest text-right">{t('actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -472,8 +475,8 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                             <button onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === apt.id ? null : apt.id); }} className="p-1 text-slate-400 hover:text-slate-600 transition-colors"><MoreHorizontal size={20} /></button>
                             {activeMenuId === apt.id && (
                               <div ref={menuRef} className="absolute right-0 top-10 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden py-1">
-                                <button onClick={(e) => handleEditClick(e, apt)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"><Pencil size={14} /> Edit</button>
-                                <button onClick={(e) => handleDeleteClick(e, apt.id)} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"><Trash2 size={14} /> Delete</button>
+                                <button onClick={(e) => handleEditClick(e, apt)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"><Pencil size={14} /> {t('edit')}</button>
+                                <button onClick={(e) => handleDeleteClick(e, apt.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"><Trash2 size={14} /> {t('delete')}</button>
                               </div>
                             )}
                           </td>
@@ -498,7 +501,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setIsEditModalOpen(false)} />
           <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-10">
-            <h2 className="text-3xl font-bold text-[#1e293b] mb-10">Edit Appointment</h2>
+            <h2 className="text-3xl font-bold text-[#1e293b] mb-10">{t('editappointment')}</h2>
             <form onSubmit={handleSaveEdit} className="space-y-6">
               <div className="space-y-5">
                 {/* Patient Name */}
@@ -507,7 +510,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                   className="w-full px-7 py-5 bg-slate-50 border border-slate-100 rounded-[20px] text-base font-semibold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
                   value={editingAppointment.patientName} 
                   onChange={e => setEditingAppointment({...editingAppointment, patientName: e.target.value})} 
-                  placeholder="Patient Name" 
+                  placeholder={t('patientname')} 
                 />
                 
                 {/* Reason */}
@@ -516,7 +519,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                   className="w-full px-7 py-5 bg-slate-50 border border-slate-100 rounded-[20px] text-base font-semibold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
                   value={editingAppointment.reason} 
                   onChange={e => setEditingAppointment({...editingAppointment, reason: e.target.value})} 
-                  placeholder="Reason for Visit" 
+                  placeholder={t('reasonforvisit')} 
                 />
                 
                 {/* Date and Status Row */}
@@ -581,13 +584,13 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                   onClick={() => setIsEditModalOpen(false)} 
                   className="text-emerald-600 font-bold uppercase tracking-[0.15em] text-sm hover:text-emerald-700 transition-colors"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button 
                   type="submit" 
                   className="px-14 py-5 bg-[#10b981] text-white font-bold rounded-full shadow-[0_12px_24px_-6px_rgba(16,185,129,0.4)] hover:bg-[#059669] hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.5)] transition-all uppercase tracking-[0.15em] text-sm"
                 >
-                  Save
+                  {t('save')}
                 </button>
               </div>
             </form>

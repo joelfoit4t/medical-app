@@ -21,10 +21,21 @@ import {
   Trash2,
   Calendar,
   User as UserIcon,
-  X,
-  User
+  Heart,
+  Thermometer,
+  Wind,
+  Droplets,
+  Scale,
+  Ruler,
+  Clock,
+  ShieldCheck,
+  Target,
+  Users as UsersIcon,
+  TrendingUp,
+  TrendingDown
 } from 'lucide-react';
-import { Patient } from '../types';
+import { Patient, Language } from '../types';
+import { useTranslation } from '../i18n/translations';
 
 interface TimelineItem {
   id: string;
@@ -48,10 +59,21 @@ interface Medication {
   isActive: boolean;
 }
 
+interface VitalReading {
+  label: string;
+  value: string;
+  unit: string;
+  status: 'normal' | 'elevated' | 'critical';
+  icon: any;
+  trend: 'up' | 'down' | 'stable';
+  timestamp: string;
+}
+
 interface Props {
   patients: Patient[];
   selectedId: string | null;
-  onBack: () => void;
+  onBack: void | (() => void);
+  language: Language;
 }
 
 /**
@@ -62,7 +84,6 @@ const MaterialDatePicker: React.FC<{
   onChange: (val: string) => void;
   onClose: () => void;
 }> = ({ value, onChange, onClose }) => {
-  // Use current date as default view if no value provided
   const initialDate = useMemo(() => {
     if (!value || value === 'Prescription date' || value === 'Select Date') return new Date();
     const d = new Date(value);
@@ -83,15 +104,12 @@ const MaterialDatePicker: React.FC<{
     const prevMonthDays = daysInMonth(viewDate.getMonth() - 1, viewDate.getFullYear());
     
     const arr = [];
-    // Previous month filler
     for (let i = startDay - 1; i >= 0; i--) {
       arr.push({ day: prevMonthDays - i, current: false, date: new Date(year, viewDate.getMonth() - 1, prevMonthDays - i) });
     }
-    // Current month
     for (let i = 1; i <= dCount; i++) {
       arr.push({ day: i, current: true, date: new Date(year, viewDate.getMonth(), i) });
     }
-    // Next month filler
     const total = 42;
     const remaining = total - arr.length;
     for (let i = 1; i <= remaining; i++) {
@@ -125,13 +143,11 @@ const MaterialDatePicker: React.FC<{
           </button>
         </div>
       </div>
-
       <div className="grid grid-cols-7 text-center mb-3">
         {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
           <span key={d} className="text-[10px] font-black text-slate-300 py-1 uppercase tracking-tighter">{d}</span>
         ))}
       </div>
-
       <div className="grid grid-cols-7 gap-y-1.5">
         {days.map((item, idx) => {
           const isToday = item.date.toDateString() === new Date().toDateString();
@@ -152,7 +168,6 @@ const MaterialDatePicker: React.FC<{
           );
         })}
       </div>
-
       <div className="flex items-center justify-end mt-5 pt-4 border-t border-slate-50">
         <button 
           type="button" 
@@ -175,9 +190,10 @@ const INITIAL_MEDICATIONS: Medication[] = [
   { id: 'm6', name: 'Amoxicillin', strength: '500mg', dosage: '6 capsules', instructions: '3 times a day after meal', prescribedBy: 'Dr. Jane Sully', prescrDate: '23 July, 2023', isActive: true },
 ];
 
-export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBack }) => {
+export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBack, language }) => {
   const [activeTab, setActiveTab] = useState('Overview');
   const [expandedItems, setExpandedItems] = useState<string[]>(['up-1']);
+  const t = useTranslation(language);
   
   // Medication state
   const [medications, setMedications] = useState<Medication[]>(INITIAL_MEDICATIONS);
@@ -246,6 +262,15 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
     }
   ];
 
+  const vitalsData: VitalReading[] = [
+    { label: 'Heart Rate', value: '72', unit: 'bpm', status: 'normal', icon: Heart, trend: 'stable', timestamp: '2 hours ago' },
+    { label: 'Blood Pressure', value: '118/76', unit: 'mmHg', status: 'normal', icon: Activity, trend: 'down', timestamp: '2 hours ago' },
+    { label: 'Temperature', value: '36.8', unit: '°C', status: 'normal', icon: Thermometer, trend: 'stable', timestamp: '2 hours ago' },
+    { label: 'Respiratory Rate', value: '14', unit: 'bpm', status: 'normal', icon: Wind, trend: 'up', timestamp: '4 hours ago' },
+    { label: 'Oxygen Saturation', value: '98', unit: '%', status: 'normal', icon: Droplets, trend: 'stable', timestamp: '2 hours ago' },
+    { label: 'Weight', value: '74.5', unit: 'kg', status: 'elevated', icon: Scale, trend: 'up', timestamp: 'Last visit' },
+  ];
+
   const toggleItem = (id: string) => {
     setExpandedItems(prev => 
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
@@ -260,7 +285,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
 
   const handleEditMedication = (med: Medication) => {
     setEditingMedication({ ...med });
-    // Fix: line 263 changed from setIsEditModalOpen to setIsEditMedModalOpen
     setIsEditMedModalOpen(true);
     setActiveActionMedId(null);
   };
@@ -296,7 +320,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
     setShowDatePicker(false);
   };
 
-  // Removed 'Patient profile' from tabs as requested
   const tabs = [
     'Overview', 'Clinical data', 'Medications', 'Care plans', 
     'Benefits', 'Relationships', 'Unified health score', 'Schedule'
@@ -398,7 +421,8 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   <td className="px-6 py-5 border-r border-slate-200">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400">
-                        <User size={12} />
+                        {/* DO fix "Cannot find name 'User'" error by using the aliased 'UserIcon' component */}
+                        <UserIcon size={12} />
                       </div>
                       <span className="text-sm font-bold text-slate-700 hover:text-emerald-600 cursor-pointer hover:underline underline-offset-4">{med.prescribedBy}</span>
                     </div>
@@ -437,6 +461,166 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCarePlansTab = () => (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Vitals Dashboard Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Current Vitals</h3>
+            <p className="text-xs text-slate-500 font-medium">Last updated today at 10:42 AM</p>
+          </div>
+          <button className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-all">
+            <Plus size={14} /> Log new vitals
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          {vitalsData.map((vital, idx) => (
+            <div key={idx} className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm group hover:border-emerald-300 transition-all hover:shadow-md">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10 h-10 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-colors">
+                  <vital.icon size={20} />
+                </div>
+                {vital.trend === 'up' ? (
+                  <TrendingUp size={16} className="text-red-400" />
+                ) : vital.trend === 'down' ? (
+                  <TrendingDown size={16} className="text-emerald-400" />
+                ) : (
+                  <div className="w-4 h-0.5 bg-slate-200" />
+                )}
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{vital.label}</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-black text-slate-800 tracking-tight">{vital.value}</span>
+                  <span className="text-xs font-bold text-slate-400">{vital.unit}</span>
+                </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-50 flex items-center justify-between">
+                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                  vital.status === 'normal' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                }`}>
+                  {vital.status}
+                </span>
+                <span className="text-[9px] font-bold text-slate-300 italic">{vital.timestamp}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Active Care Plan Details */}
+        <div className="lg:col-span-8 space-y-6">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white">
+                  <Target size={20} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-800">Active Goals</h4>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Plan: Hypertension Management v2.1</p>
+                </div>
+              </div>
+              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <MoreHorizontal size={20} className="text-slate-400" />
+              </button>
+            </div>
+            
+            <div className="p-8 space-y-8">
+              {[
+                { title: 'Lower systolic BP to <130 mmHg', progress: 65, status: 'On track', date: 'Target: July 2025' },
+                { title: 'Daily physical activity (30 mins)', progress: 40, status: 'Attention', date: 'Weekly avg: 18 mins' },
+                { title: 'Weight reduction goal (-5kg)', progress: 20, status: 'At risk', date: 'Current: +1.2kg' }
+              ].map((goal, idx) => (
+                <div key={idx} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-slate-800">{goal.title}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">{goal.date}</p>
+                    </div>
+                    <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${
+                      goal.status === 'On track' ? 'bg-emerald-50 text-emerald-600' :
+                      goal.status === 'Attention' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'
+                    }`}>
+                      {goal.status}
+                    </span>
+                  </div>
+                  <div className="relative w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-out ${
+                        goal.status === 'On track' ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]' :
+                        goal.status === 'Attention' ? 'bg-amber-500' : 'bg-red-500'
+                      }`}
+                      style={{ width: `${goal.progress}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="p-6 bg-slate-50/50 border-t border-slate-100">
+               <button className="w-full py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                 <FileText size={16} /> Generate comprehensive care report
+               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Care Team Section */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <h4 className="font-bold text-slate-800">Care Team</h4>
+              <button className="text-emerald-500 hover:text-emerald-600">
+                <Plus size={20} />
+              </button>
+            </div>
+            
+            <div className="space-y-5">
+              {[
+                { name: 'Dr. Clara Redfield', role: 'Primary Physician', status: 'Active' },
+                { name: 'Dr. Derek Lowe', role: 'Cardiologist', status: 'Consultant' },
+                { name: 'Sarah Jenkins', role: 'Registered Nurse', status: 'Active' }
+              ].map((member, idx) => (
+                <div key={idx} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-2xl transition-all cursor-pointer group">
+                  <img src={`https://i.pravatar.cc/150?u=team-${idx}`} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-white shadow-sm" alt="" />
+                  <div>
+                    <p className="text-sm font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">{member.name}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{member.role}</p>
+                  </div>
+                  <div className="ml-auto">
+                    <MessageSquare size={16} className="text-slate-200 group-hover:text-emerald-400 transition-colors" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-emerald-900 rounded-3xl p-6 text-white space-y-4 shadow-xl shadow-emerald-900/20 relative overflow-hidden">
+             <div className="absolute top-[-20px] right-[-20px] w-40 h-40 bg-emerald-800 rounded-full opacity-20 blur-2xl" />
+             <div className="relative z-10 space-y-4">
+                <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+                      <ShieldCheck size={20} />
+                   </div>
+                   <h5 className="font-bold text-sm tracking-tight">Clinical Compliance</h5>
+                </div>
+                <p className="text-xs text-emerald-100/80 leading-relaxed font-medium">
+                  Patient care plan is currently 92% compliant with latest Cardiology guidelines.
+                </p>
+                <button className="w-full py-3 bg-[#10b981] hover:bg-emerald-400 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg">
+                  View full analysis
+                </button>
+             </div>
+          </div>
         </div>
       </div>
     </div>
@@ -607,7 +791,8 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
       <div className="p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
         {activeTab === 'Overview' && renderOverviewTab()}
         {activeTab === 'Medications' && renderMedicationsTab()}
-        {!['Overview', 'Medications'].includes(activeTab) && (
+        {activeTab === 'Care plans' && renderCarePlansTab()}
+        {!['Overview', 'Medications', 'Care plans'].includes(activeTab) && (
           <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm p-20 text-center">
             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-400">
                <FileText size={32} />
@@ -634,7 +819,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   onChange={e => setNewMedication({...newMedication, name: e.target.value})} 
                   placeholder="Medication name" 
                 />
-                
                 <div className="grid grid-cols-2 gap-5">
                   <input 
                     type="text" 
@@ -653,7 +837,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     placeholder="Dosage" 
                   />
                 </div>
-
                 <textarea 
                   required
                   className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all resize-none shadow-sm" 
@@ -662,7 +845,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   onChange={e => setNewMedication({...newMedication, instructions: e.target.value})} 
                   placeholder="Instructions" 
                 />
-
                 <div className="grid grid-cols-2 gap-5">
                   <div className="relative group h-[68px]">
                     <input 
@@ -675,7 +857,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     />
                     <UserIcon size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none" />
                   </div>
-                  
                   <div className="relative h-[68px]" ref={datePickerRef}>
                     <div 
                       onClick={() => setShowDatePicker(!showDatePicker)}
@@ -696,7 +877,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   </div>
                 </div>
               </div>
-
               <div className="flex items-center justify-end gap-12 pt-12">
                 <button 
                   type="button" 
@@ -732,7 +912,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   onChange={e => setEditingMedication({...editingMedication, name: e.target.value})} 
                   placeholder="Medication name" 
                 />
-                
                 <div className="grid grid-cols-2 gap-5">
                   <input 
                     type="text" 
@@ -749,7 +928,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     placeholder="Dosage" 
                   />
                 </div>
-
                 <textarea 
                   className="w-full px-8 py-5 bg-[#fcfdfe] border border-slate-100 rounded-[24px] text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-400 transition-all resize-none shadow-sm" 
                   rows={3}
@@ -757,7 +935,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   onChange={e => setEditingMedication({...editingMedication, instructions: e.target.value})} 
                   placeholder="Instructions" 
                 />
-
                 <div className="grid grid-cols-2 gap-5">
                   <div className="relative group h-[68px]">
                     <input 
@@ -769,7 +946,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     />
                     <UserIcon size={20} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none" />
                   </div>
-                  
                   <div className="relative h-[68px]" ref={datePickerRef}>
                     <div 
                       onClick={() => setShowDatePicker(!showDatePicker)}
@@ -789,7 +965,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     )}
                   </div>
                 </div>
-
                 <div className="flex items-center gap-6 pt-2">
                   <span className="text-sm font-black text-slate-500 uppercase tracking-widest">Medication is currently active</span>
                   <button 
@@ -801,7 +976,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                   </button>
                 </div>
               </div>
-
               <div className="flex items-center justify-end gap-12 pt-12">
                 <button 
                   type="button" 

@@ -7,12 +7,13 @@ import { PatientProfileView } from './components/PatientProfileView';
 import { AddPatientView } from './components/AddPatientView';
 import { AddAppointmentView } from './components/AddAppointmentView';
 import { StaffListView } from './components/StaffListView';
-import { NavItem, Patient, Appointment } from './types';
+import { NavItem, Patient, Appointment, Language } from './types';
 import { MOCK_PATIENTS, MOCK_APPOINTMENTS } from './constants';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<NavItem>('Appointment List');
+  const [language, setLanguage] = useState<Language>('EN');
   const [patients, setPatients] = useState<Patient[]>(MOCK_PATIENTS);
   const [appointments, setAppointments] = useState<Appointment[]>(MOCK_APPOINTMENTS);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
@@ -44,6 +45,7 @@ function App() {
       case 'Appointment List':
         return (
           <CalendarView 
+            language={language}
             appointments={appointments} 
             onUpdateAppointment={handleUpdateAppointment}
             onDeleteAppointment={handleDeleteAppointment}
@@ -53,6 +55,7 @@ function App() {
       case 'Add Appointment':
         return (
           <AddAppointmentView 
+            language={language}
             onAddAppointment={handleAddAppointment}
             onSuccess={() => setActiveNav('Appointment List')}
           />
@@ -61,6 +64,7 @@ function App() {
       case 'Patient List':
         return (
           <PatientListView 
+            language={language}
             patients={patients} 
             setPatients={setPatients} 
             onViewProfile={handleNavigateToProfile}
@@ -68,16 +72,17 @@ function App() {
           />
         );
       case 'Patient Profile':
-        return <PatientProfileView patients={patients} selectedId={selectedPatientId} onBack={() => setActiveNav('Patient List')} />;
+        return <PatientProfileView language={language} patients={patients} selectedId={selectedPatientId} onBack={() => setActiveNav('Patient List')} />;
       case 'Add Patient':
         return (
           <AddPatientView 
+            language={language}
             onAddPatient={handleAddPatient} 
             onSuccess={() => setActiveNav('Patient List')} 
           />
         );
       case 'Staff':
-        return <StaffListView />;
+        return <StaffListView language={language} />;
       case 'Dashboard':
         return (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 h-[calc(100vh-64px)]">
@@ -111,10 +116,16 @@ function App() {
             setIsSidebarOpen(false);
         }}
         onClose={() => setIsSidebarOpen(false)} 
+        language={language}
       />
       
       <div className="flex-1 flex flex-col min-w-0">
-        <Header activeNav={activeNav} onMenuClick={() => setIsSidebarOpen(true)} />
+        <Header 
+          activeNav={activeNav} 
+          onMenuClick={() => setIsSidebarOpen(true)} 
+          language={language}
+          onLanguageChange={setLanguage}
+        />
         
         <main className="lg:pl-64 pt-16 flex-1 overflow-y-auto bg-[#fcfcfc]">
           {renderContent()}

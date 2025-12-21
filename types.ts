@@ -1,3 +1,5 @@
+export type Language = 'EN' | 'FR';
+
 export enum AppointmentStatus {
   Completed = 'Completed',
   Scheduled = 'Scheduled',
