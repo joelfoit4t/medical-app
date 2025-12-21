@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ArrowLeft, 
@@ -792,7 +793,8 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {Object.values(groupedLabs).flat().map((lab) => (
+                {/* Explicitly type the 'lab' parameter to resolve 'unknown' property access errors */}
+                {Object.values(groupedLabs).flat().map((lab: LabReport) => (
                   <tr key={lab.id} className="hover:bg-slate-50/30 transition-all group">
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-3">
