@@ -72,7 +72,15 @@ function App() {
           />
         );
       case 'Patient Profile':
-        return <PatientProfileView language={language} patients={patients} selectedId={selectedPatientId} onBack={() => setActiveNav('Patient List')} />;
+        return (
+          <PatientProfileView 
+            language={language} 
+            patients={patients} 
+            selectedId={selectedPatientId} 
+            onBack={() => setActiveNav('Patient List')}
+            onPatientSelect={handleNavigateToProfile}
+          />
+        );
       case 'Add Patient':
         return (
           <AddPatientView 
