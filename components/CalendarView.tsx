@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -225,7 +226,7 @@ const MaterialTimePicker: React.FC<{
 };
 
 export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointment, onDeleteAppointment, onAddAppointment, language }) => {
-  const [viewType, setViewType] = useState<ViewType>('list');
+  const [viewType, setViewType] = useState<ViewType>('calendar');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
@@ -340,8 +341,8 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
     setCurrentDate(newDate);
   };
 
-  const handleEditClick = (e: React.MouseEvent, apt: Appointment) => {
-    e.stopPropagation();
+  const handleEditClick = (e: React.MouseEvent | undefined, apt: Appointment) => {
+    if (e) e.stopPropagation();
     setEditingAppointment({ ...apt });
     setIsEditModalOpen(true);
     setActiveMenuId(null);
@@ -412,7 +413,9 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                   <div key={day.fullDate} className={`relative border-r border-slate-200 last:border-r-0 min-w-[140px] ${day.active ? 'bg-emerald-50/10' : ''}`}>
                      {TIME_SLOTS.map((_, tIdx) => (<div key={tIdx} className="border-b border-slate-200 h-[160px] w-full"></div>))}
                      {displayAppointments.filter(apt => apt.date === day.fullDate).map(apt => (
-                       <div key={apt.id} className="absolute left-3 right-3 z-10 transition-all" style={{ top: `${(parseInt(apt.startTime.split(':')[0]) - START_HOUR + parseInt(apt.startTime.split(':')[1])/60) * PIXELS_PER_HOUR}px`, height: '148px' }}><AppointmentCard appointment={apt} /></div>
+                       <div key={apt.id} className="absolute left-3 right-3 z-10 transition-all" style={{ top: `${(parseInt(apt.startTime.split(':')[0]) - START_HOUR + parseInt(apt.startTime.split(':')[1])/60) * PIXELS_PER_HOUR}px`, height: '148px' }}>
+                         <AppointmentCard appointment={apt} onClick={() => handleEditClick(undefined, apt)} />
+                       </div>
                      ))}
                   </div>
                 ))}
@@ -588,7 +591,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                 </button>
                 <button 
                   type="submit" 
-                  className="px-14 py-5 bg-[#10b981] text-white font-bold rounded-full shadow-[0_12px_24px_-6px_rgba(16,185,129,0.4)] hover:bg-[#059669] hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.5)] transition-all uppercase tracking-[0.15em] text-sm"
+                  className="px-14 py-5 bg-[#10b981] text-white font-bold rounded-full shadow-[0_12px_24px_-66px_rgba(16,185,129,0.4)] hover:bg-[#059669] hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.5)] transition-all uppercase tracking-[0.15em] text-sm"
                 >
                   {t('save')}
                 </button>

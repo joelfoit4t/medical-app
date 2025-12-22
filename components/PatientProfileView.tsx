@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ArrowLeft, 
@@ -103,7 +104,8 @@ interface EvaluationNote {
 interface Props {
   patients: Patient[];
   selectedId: string | null;
-  onBack: void | (() => void);
+  // Fixed type: onBack must be a function to be assigned to onClick
+  onBack: () => void;
   language: Language;
   onPatientSelect?: (id: string) => void;
 }
@@ -923,47 +925,4 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
       {isEditMedModalOpen && editingMedication && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setIsEditMedModalOpen(false)} />
-          <div className="bg-white rounded-[60px] shadow-2xl w-full max-w-2xl overflow-hidden relative z-10 p-16">
-            <h2 className="text-[42px] font-black text-[#1e293b] mb-12">Edit Medication</h2>
-            <form onSubmit={handleSaveMedication} className="space-y-8">
-              <div className="space-y-6">
-                <input type="text" required className="w-full px-8 py-6 bg-white border-2 border-emerald-400 rounded-[28px] text-xl font-bold text-slate-800 focus:outline-none transition-all shadow-sm" value={editingMedication.name} onChange={e => setEditingMedication({...editingMedication, name: e.target.value})} placeholder="Medication name" />
-                <div className="grid grid-cols-2 gap-6">
-                  <input type="text" required className="w-full px-8 py-6 bg-slate-50/50 border border-slate-100 rounded-[28px] text-xl font-bold text-slate-800 focus:outline-none transition-all" value={editingMedication.strength} onChange={e => setEditingMedication({...editingMedication, strength: e.target.value})} placeholder="Strength" />
-                  <input type="text" required className="w-full px-8 py-6 bg-slate-50/50 border border-slate-100 rounded-[28px] text-xl font-bold text-slate-800 focus:outline-none transition-all" value={editingMedication.dosage} onChange={e => setEditingMedication({...editingMedication, dosage: e.target.value})} placeholder="Dosage" />
-                </div>
-                <textarea required className="w-full px-8 py-6 bg-slate-50/50 border border-slate-100 rounded-[28px] text-xl font-bold text-slate-800 focus:outline-none resize-none" rows={4} value={editingMedication.instructions} onChange={e => setEditingMedication({...editingMedication, instructions: e.target.value})} placeholder="Instructions" />
-                <div className="grid grid-cols-2 gap-6">
-                   <div className="relative group h-[82px] flex items-center bg-slate-50/50 border border-slate-100 rounded-[28px] px-8">
-                    <input 
-                      type="text" required 
-                      className="w-full bg-transparent text-xl font-bold text-slate-800 pr-10 focus:outline-none" 
-                      value={editingMedication.prescribedBy} onChange={e => setEditingMedication({...editingMedication, prescribedBy: e.target.value})} 
-                      placeholder="Prescribed by" 
-                    />
-                    <UserIcon size={24} className="text-emerald-400" />
-                   </div>
-                   <div className="relative group h-[82px] flex items-center bg-slate-50/50 border border-slate-100 rounded-[28px] px-8 cursor-pointer" ref={datePickerRef}>
-                    <div onClick={() => setShowDatePicker(!showDatePicker)} className="w-full flex items-center justify-between">
-                      <span className={`text-xl font-bold ${editingMedication.prescrDate ? 'text-slate-800' : 'text-slate-300'}`}>{editingMedication.prescrDate || 'Prescription date'}</span>
-                      <Calendar size={24} className="text-emerald-400" />
-                    </div>
-                    {showDatePicker && (<MaterialDatePicker value={editingMedication.prescrDate} onChange={(val) => setEditingMedication({...editingMedication, prescrDate: val})} onClose={() => setShowDatePicker(false)} />)}
-                   </div>
-                </div>
-                <div className="flex items-center gap-6 pt-2">
-                  <span className="text-sm font-black text-slate-500 uppercase tracking-widest">Active Status</span>
-                  <button type="button" onClick={() => setEditingMedication({...editingMedication, isActive: !editingMedication.isActive})} className={`w-16 h-8 rounded-full transition-all relative ${editingMedication.isActive ? 'bg-[#10b981]' : 'bg-slate-200'}`}><div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all ${editingNoteId ? 'left-9' : 'left-1'}`} /></button>
-                </div>
-              </div>
-              <div className="flex items-center justify-end gap-12 pt-12">
-                <button type="button" onClick={() => setIsEditMedModalOpen(false)} className="text-emerald-500 font-black uppercase tracking-[0.2em] text-sm hover:text-emerald-700 transition-colors">Cancel</button>
-                <button type="submit" className="px-16 py-6 bg-[#10b981] text-white font-black rounded-full shadow-xl hover:bg-[#059669] transition-all uppercase tracking-[0.2em] text-base">Save Changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+          <div className="bg-white rounded-[60px] shadow-2xl w-full max-w-2xl overflow

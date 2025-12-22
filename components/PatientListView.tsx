@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   Users, 
@@ -22,13 +23,15 @@ import {
   Info
 } from 'lucide-react';
 import { StatCard } from './StatCard';
-import { PatientStatus, Patient } from '../types';
+import { PatientStatus, Patient, Language } from '../types';
 
 interface Props {
   patients: Patient[];
   setPatients: React.Dispatch<React.SetStateAction<Patient[]>>;
   onViewProfile: (id: string) => void;
   onAddPatient: () => void;
+  // Added language prop to fix the type error in App.tsx
+  language: Language;
 }
 
 /**
@@ -133,7 +136,7 @@ const MaterialDatePicker: React.FC<{
   );
 };
 
-export const PatientListView: React.FC<Props> = ({ patients, setPatients, onViewProfile, onAddPatient }) => {
+export const PatientListView: React.FC<Props> = ({ patients, setPatients, onViewProfile, onAddPatient, language }) => {
   const [filter, setFilter] = useState<'All' | PatientStatus>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);

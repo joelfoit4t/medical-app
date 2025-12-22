@@ -1,12 +1,14 @@
+
 import React from 'react';
 import { Appointment, AppointmentStatus } from '../types';
 import { Check, Clock, X, User } from 'lucide-react';
 
 interface Props {
   appointment: Appointment;
+  onClick?: () => void;
 }
 
-export const AppointmentCard: React.FC<Props> = ({ appointment }) => {
+export const AppointmentCard: React.FC<Props> = ({ appointment, onClick }) => {
   let bgColor = 'bg-white';
   let stripColor = 'bg-slate-400';
   let badgeClass = 'bg-slate-100 text-slate-600';
@@ -41,7 +43,10 @@ export const AppointmentCard: React.FC<Props> = ({ appointment }) => {
   }
 
   return (
-    <div className={`w-full h-full rounded-xl bg-white shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border border-slate-100 flex overflow-hidden hover:shadow-md transition-shadow cursor-pointer group`}>
+    <div 
+      onClick={onClick}
+      className={`w-full h-full rounded-xl bg-white shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border border-slate-100 flex overflow-hidden hover:shadow-md transition-shadow cursor-pointer group`}
+    >
       {/* Left Color Strip */}
       <div className={`w-[3px] ${stripColor} h-full flex-shrink-0`} />
       

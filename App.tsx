@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -22,6 +23,10 @@ function App() {
   const [patients, setPatients] = useState<Patient[]>(MOCK_PATIENTS);
   const [appointments, setAppointments] = useState<Appointment[]>(MOCK_APPOINTMENTS);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+
+  // Modal states
+  const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
+  const [isAddAppointmentModalOpen, setIsAddAppointmentModalOpen] = useState(false);
 
   const handleAddPatient = (newPatient: Patient) => {
     setPatients(prev => [newPatient, ...prev]);
@@ -54,6 +59,17 @@ function App() {
     setActiveNav('Appointment List');
   };
 
+  const handleNavigation = (item: NavItem) => {
+    if (item === 'Add Patient') {
+      setIsAddPatientModalOpen(true);
+    } else if (item === 'Add Appointment') {
+      setIsAddAppointmentModalOpen(true);
+    } else {
+      setActiveNav(item);
+    }
+    setIsSidebarOpen(false);
+  };
+
   const renderContent = () => {
     switch (activeNav) {
       case 'Appointment':
@@ -64,15 +80,7 @@ function App() {
             appointments={appointments} 
             onUpdateAppointment={handleUpdateAppointment}
             onDeleteAppointment={handleDeleteAppointment}
-            onAddAppointment={() => setActiveNav('Add Appointment')}
-          />
-        );
-      case 'Add Appointment':
-        return (
-          <AddAppointmentView 
-            language={language}
-            onAddAppointment={handleAddAppointment}
-            onSuccess={() => setActiveNav('Appointment List')}
+            onAddAppointment={() => setIsAddAppointmentModalOpen(true)}
           />
         );
       case 'Patient':
@@ -83,7 +91,7 @@ function App() {
             patients={patients} 
             setPatients={setPatients} 
             onViewProfile={handleNavigateToProfile}
-            onAddPatient={() => setActiveNav('Add Patient')}
+            onAddPatient={() => setIsAddPatientModalOpen(true)}
           />
         );
       case 'Patient Profile':
@@ -94,14 +102,6 @@ function App() {
             selectedId={selectedPatientId} 
             onBack={() => setActiveNav('Patient List')}
             onPatientSelect={handleNavigateToProfile}
-          />
-        );
-      case 'Add Patient':
-        return (
-          <AddPatientView 
-            language={language}
-            onAddPatient={handleAddPatient} 
-            onSuccess={() => setActiveNav('Patient List')} 
           />
         );
       case 'Staff':
@@ -159,10 +159,7 @@ function App() {
       <Sidebar 
         isOpen={isSidebarOpen} 
         activeItem={activeNav}
-        onNavigate={(item) => {
-            setActiveNav(item);
-            setIsSidebarOpen(false);
-        }}
+        onNavigate={handleNavigation}
         onClose={() => setIsSidebarOpen(false)} 
         language={language}
       />
@@ -180,6 +177,29 @@ function App() {
           {renderContent()}
         </main>
       </div>
+
+      {/* Overlay Modals */}
+      {isAddPatientModalOpen && (
+        <AddPatientView 
+          language={language}
+          onAddPatient={(p) => {
+            handleAddPatient(p);
+            setIsAddPatientModalOpen(false);
+          }}
+          onClose={() => setIsAddPatientModalOpen(false)}
+        />
+      )}
+
+      {isAddAppointmentModalOpen && (
+        <AddAppointmentView 
+          language={language}
+          onAddAppointment={(a) => {
+            handleAddAppointment(a);
+            setIsAddAppointmentModalOpen(false);
+          }}
+          onClose={() => setIsAddAppointmentModalOpen(false)}
+        />
+      )}
       
       {isSidebarOpen && (
         <div 
