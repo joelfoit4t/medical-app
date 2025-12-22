@@ -1,32 +1,58 @@
-
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { StaffListView } from '../StaffListView';
 
 describe('StaffListView', () => {
-  it('renders staff list by default', () => {
+  it('renders correctly with default list view', () => {
     render(<StaffListView />);
     expect(screen.getByText(/Total Staff/i)).toBeInTheDocument();
     expect(screen.getByText(/Dr. Clara Redfield/i)).toBeInTheDocument();
+    expect(screen.getByText(/General Medicine/i)).toBeInTheDocument();
   });
 
-  it('switches to grid view', () => {
+  it('switches to grid view and displays cards', () => {
     render(<StaffListView />);
-    const gridToggle = screen.getAllByRole('button').find(b => b.innerHTML.includes('svg')); 
-    // View toggles are the first few buttons
-    const toggles = screen.queryAllByRole('button');
-    // Find the button with LayoutGrid icon - simplified by finding the one after search
-    fireEvent.click(toggles[3]); // Index based on implementation
     
-    // Check if grid specific ID label appears
-    expect(screen.getAllByText(/ID: S1/i).length).toBeGreaterThan(0);
+    // Find view toggle buttons
+    const toggles = screen.getAllByRole('button').filter(b => b.querySelector('svg'));
+    // Index 3 is typically the LayoutGrid toggle in the toolbar
+    fireEvent.click(toggles[3]);
+    
+    expect(screen.getByText(/ID: S1/i)).toBeInTheDocument();
+    expect(screen.getByText(/Role/i)).toBeInTheDocument();
   });
 
-  it('opens advanced filters popup', () => {
+  it('filters staff by role', () => {
     render(<StaffListView />);
-    const filterBtn = screen.getByText(/Filter/i);
-    fireEvent.click(filterBtn);
-    expect(screen.getByText(/Advanced Filters/i)).toBeInTheDocument();
-    expect(screen.getByText(/Professional Role/i)).toBeInTheDocument();
+    
+    // Open filter popup
+    fireEvent.click(screen.getByText('Filter'));
+    
+    // Filter for Nurse
+    const nurseBtn = screen.getByRole('button', { name: 'Nurse' });
+    fireEvent.click(nurseBtn);
+    
+    // Apply filters
+    fireEvent.click(screen.getByText('Apply Filters'));
+    
+    expect(screen.getByText(/Jill Valentine/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Dr. Leon Kennedy/i)).not.toBeInTheDocument();
+  });
+
+  it('opens and submits the Add Staff modal', () => {
+    render(<StaffListView />);
+    
+    fireEvent.click(screen.getByText(/Add staff/i));
+    expect(screen.getByText(/Register Staff Member/i)).toBeInTheDocument();
+    
+    const nameInput = screen.getByPlaceholderText(/e.g. Dr. Jane Cooper/i);
+    fireEvent.change(nameInput, { target: { value: 'Dr. New Staff' } });
+    
+    const emailInput = screen.getByPlaceholderText(/jane.cooper@medicare.com/i);
+    fireEvent.change(emailInput, { target: { value: 'new@medicare.com' } });
+    
+    fireEvent.click(screen.getByText(/Confirm Registration/i));
+    
+    expect(screen.getByText('Dr. New Staff')).toBeInTheDocument();
   });
 });

@@ -199,7 +199,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // CKEditor Initialization with enhanced toolbar features
+  // CKEditor Initialization with full set of features matching the provided screenshot
   useEffect(() => {
     if (editorContainerRef.current && typeof ClassicEditor !== 'undefined' && activeTab === 'Care plan') {
       ClassicEditor
@@ -551,7 +551,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
         {/* Evaluation Notes Input Area */}
         <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[450px]">
           <div className="p-8 border-b border-slate-100 flex items-center justify-between">
-            <h4 className="font-black text-slate-800 uppercase tracking-[0.2em] text-xs">EVALUATION NOTES</h4>
+            <h4 className="font-black text-slate-800 tracking-tight text-sm">Evaluation Notes</h4>
             <button 
               onClick={handleSaveNotes} 
               disabled={isSavingNotes || !currentEvalContent.trim()} 
@@ -569,7 +569,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           </div>
         </div>
 
-        {/* Notes Log - Refined styling for natural icon colors and Title Case layout */}
+        {/* Notes Log - Refined styling for natural icon colors (Blue for edit, Red for delete) */}
         <div className="space-y-8 pb-20">
           {evaluations.map(e => (
             <div key={e.id} className="bg-white rounded-[40px] border border-slate-100 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.03)] p-10 group transition-all">
@@ -584,17 +584,17 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                 <div className="flex items-center gap-5">
                   <button 
                     onClick={() => handleEditNote(e)} 
-                    className="text-slate-300 hover:text-blue-500 transition-colors"
+                    className="text-blue-500 hover:text-blue-700 transition-colors"
                     title="Edit Note"
                   >
-                    <Pencil size={20} strokeWidth={2} />
+                    <Pencil size={20} strokeWidth={2.5} />
                   </button>
                   <button 
                     onClick={() => handleDeleteNote(e.id)} 
-                    className="text-slate-300 hover:text-red-500 transition-colors"
+                    className="text-red-500 hover:text-red-700 transition-colors"
                     title="Delete Note"
                   >
-                    <Trash2 size={20} strokeWidth={2} />
+                    <Trash2 size={20} strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
@@ -647,7 +647,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
         </div>
       </div>
       <div className="space-y-12">
-        {Object.entries(groupedLabs).sort((a, b) => b[0].localeCompare(a[0])).map(([year, labs]) => (
+        {(Object.entries(groupedLabs) as [string, LabReport[]][]).sort((a, b) => b[0].localeCompare(a[0])).map(([year, labs]) => (
           <div key={year} className="relative">
             <div className="flex items-center gap-4 mb-8">
               <div className="h-px flex-1 bg-slate-200"></div>
@@ -656,7 +656,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
             </div>
             {labViewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {labs.map((lab) => (
+                {(labs as LabReport[]).map((lab) => (
                   <div key={lab.id} className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden group hover:border-emerald-300 transition-all flex flex-col">
                     <div className="p-8 space-y-6 flex-1">
                       <div className="flex items-start justify-between">
@@ -690,7 +690,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {labs.map((lab) => (
+                    {(labs as LabReport[]).map((lab) => (
                       <tr key={lab.id} className="hover:bg-slate-50/30 transition-colors group">
                         <td className="px-8 py-5 text-sm font-bold text-slate-400">{lab.date}</td>
                         <td className="px-8 py-5"><p className="text-sm font-black text-slate-800">{lab.title}</p></td>
@@ -723,14 +723,14 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
         </div>
       </div>
 
-      {/* Navbar with Title Case styling */}
+      {/* Navbar with Sentence Case styling as requested */}
       <div className="bg-white border-b border-slate-200 px-6 overflow-x-auto sticky top-[65px] z-20 shadow-sm">
         <div className="flex gap-8">
           {tabs.map((tab) => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab)}
-              className={`py-4 text-sm font-bold whitespace-nowrap transition-all border-b-4 ${
+              className={`py-4 text-sm font-bold whitespace-nowrap transition-all border-b-4 normal-case ${
                 activeTab === tab ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-600'
               }`}
             >
@@ -745,7 +745,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 animate-in fade-in duration-500">
              <div className="xl:col-span-8 space-y-8">
                <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm p-10 flex flex-col md:flex-row items-center gap-10">
-                 <div className="w-32 h-32 bg-emerald-50 rounded-[48px] flex items-center justify-center text-emerald-500 text-4xl font-black shadow-inner">
+                 <div className="w-32 h-32 bg-emerald-50 rounded-[48px] flex items-center justify-center text-emerald-50 text-4xl font-black shadow-inner">
                    {selectedPatient.name.charAt(0)}
                  </div>
                  <div className="flex-1 text-center md:text-left">
@@ -905,7 +905,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                 <p className="text-slate-600 font-medium leading-relaxed">{viewingReport.findings || 'No specific findings documented.'}</p>
               </div>
               <div className="flex gap-4">
-                <button className="flex-1 py-4 bg-slate-900 text-white rounded-full font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all flex items-center justify-center gap-2"><Download size={16} /> Download Report</button>
+                <button onClick={() => {}} className="flex-1 py-4 bg-slate-900 text-white rounded-full font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all flex items-center justify-center gap-2"><Download size={16} /> Download Report</button>
                 <button onClick={() => setViewingReport(null)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-full hover:bg-slate-200 transition-all uppercase tracking-widest text-[11px]">Close Preview</button>
               </div>
             </div>
