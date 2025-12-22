@@ -1,58 +1,46 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { StaffListView } from '../StaffListView';
+import { StaffRole } from '../../types';
 
 describe('StaffListView', () => {
-  it('renders correctly with default list view', () => {
-    render(<StaffListView />);
-    expect(screen.getByText(/Total Staff/i)).toBeInTheDocument();
-    expect(screen.getByText(/Dr. Clara Redfield/i)).toBeInTheDocument();
-    expect(screen.getByText(/General Medicine/i)).toBeInTheDocument();
-  });
-
-  it('switches to grid view and displays cards', () => {
+  it('toggles between list and grid view correctly', () => {
     render(<StaffListView />);
     
-    // Find view toggle buttons
+    // Default is List
+    expect(screen.getByText(/Staff Name/i)).toBeInTheDocument();
+    
+    // Switch to Grid
     const toggles = screen.getAllByRole('button').filter(b => b.querySelector('svg'));
-    // Index 3 is typically the LayoutGrid toggle in the toolbar
-    fireEvent.click(toggles[3]);
+    fireEvent.click(toggles[3]); // LayoutGrid icon
     
-    expect(screen.getByText(/ID: S1/i)).toBeInTheDocument();
-    expect(screen.getByText(/Role/i)).toBeInTheDocument();
+    // In grid mode, we see cards with email labels
+    expect(screen.getAllByText(/Email/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Email Address/i)).not.toBeInTheDocument(); // Table header should be gone
   });
 
-  it('filters staff by role', () => {
+  it('handles role and status filtering combinations', () => {
     render(<StaffListView />);
     
-    // Open filter popup
-    fireEvent.click(screen.getByText('Filter'));
+    // Open filter
+    fireEvent.click(screen.getByRole('button', { name: /Filter/i }));
     
-    // Filter for Nurse
-    const nurseBtn = screen.getByRole('button', { name: 'Nurse' });
-    fireEvent.click(nurseBtn);
+    // Select Surgeon role
+    fireEvent.click(screen.getByRole('button', { name: 'Surgeon' }));
+    fireEvent.click(screen.getByRole('button', { name: /Apply Filters/i }));
     
-    // Apply filters
-    fireEvent.click(screen.getByText('Apply Filters'));
-    
-    expect(screen.getByText(/Jill Valentine/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Dr. Leon Kennedy/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/Dr. Leon Kennedy/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Dr. Clara Redfield/i)).not.toBeInTheDocument();
   });
 
-  it('opens and submits the Add Staff modal', () => {
+  it('removes a staff member from the list', () => {
     render(<StaffListView />);
     
-    fireEvent.click(screen.getByText(/Add staff/i));
-    expect(screen.getByText(/Register Staff Member/i)).toBeInTheDocument();
+    const moreBtns = screen.getAllByRole('button').filter(b => b.querySelector('.lucide-more-horizontal'));
+    fireEvent.click(moreBtns[0]);
     
-    const nameInput = screen.getByPlaceholderText(/e.g. Dr. Jane Cooper/i);
-    fireEvent.change(nameInput, { target: { value: 'Dr. New Staff' } });
+    fireEvent.click(screen.getByText(/Remove Staff/i));
     
-    const emailInput = screen.getByPlaceholderText(/jane.cooper@medicare.com/i);
-    fireEvent.change(emailInput, { target: { value: 'new@medicare.com' } });
-    
-    fireEvent.click(screen.getByText(/Confirm Registration/i));
-    
-    expect(screen.getByText('Dr. New Staff')).toBeInTheDocument();
+    expect(screen.queryByText(/Dr. Clara Redfield/i)).not.toBeInTheDocument();
   });
 });

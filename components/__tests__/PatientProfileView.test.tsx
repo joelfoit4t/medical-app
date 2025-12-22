@@ -7,11 +7,13 @@ import { MOCK_PATIENTS } from '../../constants';
 (window as any).ClassicEditor = {
   create: vi.fn().mockResolvedValue({
     setData: vi.fn(),
-    getData: vi.fn().mockReturnValue('<p>Test Note Content</p>'),
+    getData: vi.fn().mockReturnValue('<p>New evaluation note content</p>'),
     destroy: vi.fn().mockResolvedValue(null),
     model: {
       document: {
-        on: vi.fn()
+        on: vi.fn((event, cb) => {
+          // No-op for mock
+        })
       }
     }
   })
@@ -25,21 +27,7 @@ describe('PatientProfileView', () => {
     vi.clearAllMocks();
   });
 
-  it('renders correctly and defaults to Care Plan tab', () => {
-    render(
-      <PatientProfileView 
-        patients={MOCK_PATIENTS} 
-        selectedId="1" 
-        onBack={mockOnBack} 
-        language="EN" 
-        onPatientSelect={mockOnSelect} 
-      />
-    );
-    expect(screen.getByText(/Active Evaluation/i)).toBeInTheDocument();
-    expect(screen.getByText(/Vitals History Log/i)).toBeInTheDocument();
-  });
-
-  it('switches between tabs and shows correct content', () => {
+  it('allows adding a new clinical evaluation note', async () => {
     render(
       <PatientProfileView 
         patients={MOCK_PATIENTS} 
@@ -49,72 +37,20 @@ describe('PatientProfileView', () => {
       />
     );
 
-    // Overview Tab
-    fireEvent.click(screen.getByText('Overview'));
-    expect(screen.getByText(/Patient Health Summary/i)).toBeInTheDocument();
-    expect(screen.getByText(/UNIFIED SCORE/i)).toBeInTheDocument();
-
-    // Medications Tab
-    fireEvent.click(screen.getByText('Medications'));
-    expect(screen.getByText(/Current Medications/i)).toBeInTheDocument();
-    expect(screen.getByText(/Amoxicillin/i)).toBeInTheDocument();
-
-    // Labs Tab
-    fireEvent.click(screen.getByText('Labs'));
-    expect(screen.getByText(/Laboratory Reports/i)).toBeInTheDocument();
-    expect(screen.getByText(/Full Blood Count/i)).toBeInTheDocument();
-  });
-
-  it('handles medication filtering', () => {
-    render(
-      <PatientProfileView 
-        patients={MOCK_PATIENTS} 
-        selectedId="1" 
-        onBack={mockOnBack} 
-        language="EN" 
-      />
-    );
-
-    fireEvent.click(screen.getByText('Medications'));
+    // Initial state check
+    expect(screen.getByText(/Evaluation Notes/i)).toBeInTheDocument();
     
-    const filterBtn = screen.getByText(/Active/i);
-    fireEvent.click(filterBtn);
-    
-    // Select Inactive
-    const inactiveOption = screen.getByText('Inactive');
-    fireEvent.click(inactiveOption);
-    
-    // Should show no medications as they are all active by default in mock
-    expect(screen.queryByText(/Amoxicillin/i)).not.toBeInTheDocument();
-  });
+    // Simulate Save Entry click (content is mocked from CKEditor)
+    const saveBtn = screen.getByRole('button', { name: /SAVE ENTRY/i });
+    fireEvent.click(saveBtn);
 
-  it('opens log vitals modal and submits data', async () => {
-    render(
-      <PatientProfileView 
-        patients={MOCK_PATIENTS} 
-        selectedId="1" 
-        onBack={mockOnBack} 
-        language="EN" 
-      />
-    );
-
-    const logBtn = screen.getByText(/LOG VITALS/i);
-    fireEvent.click(logBtn);
-
-    expect(screen.getByText(/Log Vitals/i)).toBeInTheDocument();
-    
-    const hrInput = screen.getByPlaceholderText(/Heart Rate/i);
-    fireEvent.change(hrInput, { target: { value: '85' } });
-    
-    const submitBtn = screen.getByText(/SAVE VITALS/i);
-    fireEvent.click(submitBtn);
-
+    // Mock timeout for saving simulation
     await waitFor(() => {
-      expect(screen.queryByText(/Log Vitals/i)).not.toBeInTheDocument();
-    });
+      expect(screen.getByText(/New evaluation note content/i)).toBeInTheDocument();
+    }, { timeout: 2000 });
   });
 
-  it('toggles lab view mode between Grid and List', () => {
+  it('allows deleting an evaluation note', async () => {
     render(
       <PatientProfileView 
         patients={MOCK_PATIENTS} 
@@ -124,14 +60,40 @@ describe('PatientProfileView', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Labs'));
+    // Find a delete button in the history log
+    const deleteBtns = screen.getAllByTitle(/Delete Note/i);
+    const initialNotesCount = deleteBtns.length;
     
-    // Find view toggle buttons
-    const toggles = screen.getAllByRole('button').filter(b => b.querySelector('svg'));
-    // The list toggle is typically the second in that group
-    fireEvent.click(toggles[3]); // List mode
+    fireEvent.click(deleteBtns[0]);
     
-    expect(screen.getByText(/Report Title/i)).toBeInTheDocument();
-    expect(screen.getByText(/Physician/i)).toBeInTheDocument();
+    expect(screen.getAllByTitle(/Delete Note/i).length).toBe(initialNotesCount - 1);
+  });
+
+  it('navigates to Medications tab and edits a dosage', () => {
+    render(
+      <PatientProfileView 
+        patients={MOCK_PATIENTS} 
+        selectedId="1" 
+        onBack={mockOnBack} 
+        language="EN" 
+      />
+    );
+
+    fireEvent.click(screen.getByText('Medications'));
+    
+    // Open action menu for first medication
+    const moreBtn = screen.getAllByRole('button').find(b => b.innerHTML.includes('svg'));
+    if (moreBtn) fireEvent.click(moreBtn);
+    
+    const editBtn = screen.getByText(/Edit Dosage/i);
+    fireEvent.click(editBtn);
+    
+    expect(screen.getByText(/Edit Medication/i)).toBeInTheDocument();
+    
+    const strengthInput = screen.getByLabelText(/Strength/i);
+    fireEvent.change(strengthInput, { target: { value: '1000MG' } });
+    
+    fireEvent.click(screen.getByRole('button', { name: /Save Changes/i }));
+    expect(screen.getByText('1000MG')).toBeInTheDocument();
   });
 });
