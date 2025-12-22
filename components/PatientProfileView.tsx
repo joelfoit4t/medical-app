@@ -3,16 +3,10 @@ import {
   ArrowLeft, 
   Phone, 
   MessageSquare, 
-  FileText, 
-  Copy, 
-  ChevronLeft,
   ChevronRight, 
-  ChevronDown, 
-  ChevronUp, 
   Plus,
   Pill,
   MoreHorizontal,
-  Check,
   Activity,
   Archive,
   Pencil,
@@ -24,27 +18,20 @@ import {
   Wind,
   Droplets,
   Scale,
-  TrendingUp,
-  TrendingDown,
-  StickyNote,
   Search,
-  History,
   X,
-  RefreshCcw,
-  Microscope,
-  Download,
-  AlertTriangle,
   Beaker,
   FileUp,
   Eye,
   List as ListIcon,
   LayoutGrid,
   Target,
-  ShieldCheck,
   Info,
   History as HistoryIcon,
   SlidersHorizontal,
-  Clock
+  Clock,
+  // Fix: Added missing Download icon import
+  Download
 } from 'lucide-react';
 import { Patient, Language, PatientStatus } from '../types';
 import { useTranslation } from '../i18n/translations';
@@ -133,7 +120,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
   const [labViewMode, setLabViewMode] = useState<'grid' | 'list'>('grid');
   const [vitalsViewMode, setVitalsViewMode] = useState<'list' | 'grid'>('list');
   
-  const [currentVitals, setCurrentVitals] = useState<VitalReading[]>([
+  const [currentVitals] = useState<VitalReading[]>([
     { label: 'HEART RATE', value: '72', unit: 'BPM', status: 'normal', icon: Heart, timestamp: '2 hours ago' },
     { label: 'BLOOD PRESSURE', value: '118/76', unit: 'MMHG', status: 'normal', icon: Activity, timestamp: '2 hours ago' },
     { label: 'TEMPERATURE', value: '36.8', unit: '°C', status: 'normal', icon: Thermometer, timestamp: '2 hours ago' },
@@ -174,6 +161,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
   
   const editorRef = useRef<any>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
+  const isInitializingRef = useRef(false);
   const t = useTranslation(language);
 
   const [medications, setMedications] = useState<Medication[]>(INITIAL_MEDICATIONS);
@@ -199,17 +187,17 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // CKEditor Initialization with full set of features matching the provided screenshot
+  // CKEditor Initialization with robust double-init protection
   useEffect(() => {
+    let localEditor: any = null;
+    
     if (editorContainerRef.current && typeof ClassicEditor !== 'undefined' && activeTab === 'Care plan') {
+      if (isInitializingRef.current || editorRef.current) return;
+
+      isInitializingRef.current = true;
       ClassicEditor
         .create(editorContainerRef.current, {
-          toolbar: [
-            'heading', '|', 
-            'bold', 'italic', 'link', 'blockQuote', '|', 
-            'bulletedList', 'numberedList', '|', 
-            'undo', 'redo'
-          ],
+          toolbar: ['heading', '|', 'bold', 'italic', 'link', 'blockQuote', '|', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
           heading: {
             options: [
               { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
@@ -219,20 +207,26 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           }
         })
         .then((editor: any) => {
+          localEditor = editor;
           editorRef.current = editor;
           editor.setData(currentEvalContent);
           editor.model.document.on('change:data', () => {
             setCurrentEvalContent(editor.getData());
           });
+          isInitializingRef.current = false;
         })
         .catch((error: any) => {
-          console.error('CKEditor initialization error:', error);
+          console.error('CKEditor error:', error);
+          isInitializingRef.current = false;
         });
     }
+
     return () => {
-      if (editorRef.current) {
-        editorRef.current.destroy().then(() => {
-          editorRef.current = null;
+      if (localEditor) {
+        localEditor.destroy().then(() => {
+          if (editorRef.current === localEditor) {
+            editorRef.current = null;
+          }
         });
       }
     };
@@ -247,7 +241,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
     setIsSavingNotes(true);
     setTimeout(() => {
       if (editingNoteId) {
-        setEvaluations(prev => prev.map(e => e.id === editingNoteId ? { ...e, content: currentEvalContent, doctor: CURRENT_USER.name, doctorAvatar: CURRENT_USER.avatar } : e));
+        setEvaluations(prev => prev.map(e => e.id === editingNoteId ? { ...e, content: currentEvalContent } : e));
       } else {
         const newNote: EvaluationNote = {
           id: Math.random().toString(36).substring(7),
@@ -656,7 +650,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
             </div>
             {labViewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(labs as LabReport[]).map((lab) => (
+                {labs.map((lab) => (
                   <div key={lab.id} className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden group hover:border-emerald-300 transition-all flex flex-col">
                     <div className="p-8 space-y-6 flex-1">
                       <div className="flex items-start justify-between">
@@ -690,7 +684,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {(labs as LabReport[]).map((lab) => (
+                    {labs.map((lab) => (
                       <tr key={lab.id} className="hover:bg-slate-50/30 transition-colors group">
                         <td className="px-8 py-5 text-sm font-bold text-slate-400">{lab.date}</td>
                         <td className="px-8 py-5"><p className="text-sm font-black text-slate-800">{lab.title}</p></td>
@@ -723,7 +717,6 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
         </div>
       </div>
 
-      {/* Navbar with Sentence Case styling as requested */}
       <div className="bg-white border-b border-slate-200 px-6 overflow-x-auto sticky top-[65px] z-20 shadow-sm">
         <div className="flex gap-8">
           {tabs.map((tab) => (
@@ -905,7 +898,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                 <p className="text-slate-600 font-medium leading-relaxed">{viewingReport.findings || 'No specific findings documented.'}</p>
               </div>
               <div className="flex gap-4">
-                <button onClick={() => {}} className="flex-1 py-4 bg-slate-900 text-white rounded-full font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all flex items-center justify-center gap-2"><Download size={16} /> Download Report</button>
+                <button onClick={() => {}} className="flex-1 py-4 bg-slate-900 text-white rounded-full font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all flex items-center justify-center gap-2"><Eye size={16} /> Download Report</button>
                 <button onClick={() => setViewingReport(null)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-full hover:bg-slate-200 transition-all uppercase tracking-widest text-[11px]">Close Preview</button>
               </div>
             </div>
