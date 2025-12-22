@@ -30,7 +30,6 @@ import {
   History as HistoryIcon,
   SlidersHorizontal,
   Clock,
-  // Fix: Added missing Download icon import
   Download
 } from 'lucide-react';
 import { Patient, Language, PatientStatus } from '../types';
@@ -563,7 +562,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
           </div>
         </div>
 
-        {/* Notes Log - Refined styling for natural icon colors (Blue for edit, Red for delete) */}
+        {/* Notes Log - Refined styling for natural icon colors (Blue for edit, Red for delete) with hover background effects */}
         <div className="space-y-8 pb-20">
           {evaluations.map(e => (
             <div key={e.id} className="bg-white rounded-[40px] border border-slate-100 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.03)] p-10 group transition-all">
@@ -575,17 +574,17 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{e.date}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-3">
                   <button 
                     onClick={() => handleEditNote(e)} 
-                    className="text-blue-500 hover:text-blue-700 transition-colors"
+                    className="p-2.5 text-blue-500 hover:bg-blue-50 hover:text-blue-700 rounded-2xl transition-all active:scale-90"
                     title="Edit Note"
                   >
                     <Pencil size={20} strokeWidth={2.5} />
                   </button>
                   <button 
                     onClick={() => handleDeleteNote(e.id)} 
-                    className="text-red-500 hover:text-red-700 transition-colors"
+                    className="p-2.5 text-red-500 hover:bg-red-50 hover:text-red-700 rounded-2xl transition-all active:scale-90"
                     title="Delete Note"
                   >
                     <Trash2 size={20} strokeWidth={2.5} />
@@ -898,7 +897,7 @@ export const PatientProfileView: React.FC<Props> = ({ patients, selectedId, onBa
                 <p className="text-slate-600 font-medium leading-relaxed">{viewingReport.findings || 'No specific findings documented.'}</p>
               </div>
               <div className="flex gap-4">
-                <button onClick={() => {}} className="flex-1 py-4 bg-slate-900 text-white rounded-full font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all flex items-center justify-center gap-2"><Eye size={16} /> Download Report</button>
+                <button onClick={() => {}} className="flex-1 py-4 bg-slate-900 text-white rounded-full font-black uppercase tracking-widest text-[11px] shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all flex items-center justify-center gap-2"><Download size={16} /> Download Report</button>
                 <button onClick={() => setViewingReport(null)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-full hover:bg-slate-200 transition-all uppercase tracking-widest text-[11px]">Close Preview</button>
               </div>
             </div>
