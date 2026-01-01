@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -16,7 +15,14 @@ import {
   Trash2, 
   ChevronUp, 
   ChevronDown, 
-  Plus
+  Plus,
+  Mail,
+  MapPin,
+  AlignLeft,
+  Bell,
+  Timer,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import { TIME_SLOTS } from '../constants';
 import { AppointmentCard } from './AppointmentCard';
@@ -71,7 +77,7 @@ const MaterialDatePicker: React.FC<{
       arr.push({ day: i, current: false, date: new Date(year, viewDate.getMonth() + 1, i) });
     }
     return arr;
-  }, [viewDate]);
+  }, [viewDate, year]);
 
   const changeMonth = (offset: number) => {
     setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + offset, 1));
@@ -179,7 +185,7 @@ const MaterialTimePicker: React.FC<{
               key={h}
               type="button"
               onClick={() => handleSelect(h, selectedM, selectedP)}
-              className={`w-full py-2.5 text-xs font-bold transition-all ${h === selectedH ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}`}
+              className={`w-full py-2.5 text-xs font-bold transition-all ${h === selectedH ? 'bg-emerald-50 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}`}
             >
               {h}
             </button>
@@ -234,7 +240,9 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
 
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showModalDatePicker, setShowModalDatePicker] = useState(false);
   const [showEditTimePicker, setShowEditTimePicker] = useState(false);
   
@@ -291,6 +299,16 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
     return `${m}/${d}/${y}`;
   };
 
+  const formatFullDateDisplay = (dateStr: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(language === 'EN' ? 'en-US' : 'fr-FR', { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
   const formatTimeDisplay = (timeStr: string) => {
     if (!timeStr) return '--:-- --';
     const [hStr, mStr] = timeStr.split(':');
@@ -345,13 +363,20 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
     if (e) e.stopPropagation();
     setEditingAppointment({ ...apt });
     setIsEditModalOpen(true);
+    setIsDetailModalOpen(false);
     setActiveMenuId(null);
   };
 
-  const handleDeleteClick = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
+  const handleViewDetail = (apt: Appointment) => {
+    setSelectedAppointment(apt);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent | undefined, id: string) => {
+    if (e) e.stopPropagation();
     onDeleteAppointment(id);
     setActiveMenuId(null);
+    setIsDetailModalOpen(false);
   };
 
   const handleSaveEdit = (e: React.FormEvent) => {
@@ -370,6 +395,20 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
       case AppointmentStatus.Canceled: return <span className={`${baseStyles} bg-red-50 text-red-600`}><X size={12} /> {t('delete')}</span>;
       case AppointmentStatus.Waiting: return <span className={`${baseStyles} bg-amber-50 text-amber-600`}><User size={12} /> Waiting</span>;
       default: return <span className={`${baseStyles} bg-emerald-50 text-emerald-600`}><Clock size={12} /> Scheduled</span>;
+    }
+  };
+
+  // Helper for detail modal status icon/text
+  const getStatusDetail = (status: AppointmentStatus) => {
+    switch (status) {
+      case AppointmentStatus.Completed:
+        return { icon: CheckCircle2, text: 'Completed', color: 'text-emerald-600' };
+      case AppointmentStatus.Canceled:
+        return { icon: XCircle, text: 'Canceled', color: 'text-red-600' };
+      case AppointmentStatus.Waiting:
+        return { icon: Timer, text: 'Patient is waiting', color: 'text-amber-600' };
+      default:
+        return { icon: Clock, text: 'Scheduled', color: 'text-emerald-600' };
     }
   };
 
@@ -414,7 +453,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                      {TIME_SLOTS.map((_, tIdx) => (<div key={tIdx} className="border-b border-slate-200 h-[160px] w-full"></div>))}
                      {displayAppointments.filter(apt => apt.date === day.fullDate).map(apt => (
                        <div key={apt.id} className="absolute left-3 right-3 z-10 transition-all" style={{ top: `${(parseInt(apt.startTime.split(':')[0]) - START_HOUR + parseInt(apt.startTime.split(':')[1])/60) * PIXELS_PER_HOUR}px`, height: '148px' }}>
-                         <AppointmentCard appointment={apt} onClick={() => handleEditClick(undefined, apt)} />
+                         <AppointmentCard appointment={apt} onClick={() => handleViewDetail(apt)} />
                        </div>
                      ))}
                   </div>
@@ -465,7 +504,7 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
                     {paginatedAppointments.length > 0 ? paginatedAppointments.map((apt) => {
                       const isSelected = selectedIds.has(apt.id);
                       return (
-                        <tr key={apt.id} onClick={() => toggleSelection(apt.id)} className={`transition-colors group cursor-pointer ${isSelected ? 'bg-emerald-50/40' : 'hover:bg-emerald-50/20'}`}>
+                        <tr key={apt.id} onClick={() => handleViewDetail(apt)} className={`transition-colors group cursor-pointer ${isSelected ? 'bg-emerald-50/40' : 'hover:bg-emerald-50/20'}`}>
                           <td className="px-8 py-5 border-r border-slate-200" onClick={(e) => e.stopPropagation()}><input type="checkbox" className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer" checked={isSelected} onChange={() => toggleSelection(apt.id)} /></td>
                           <td className="px-8 py-5 text-sm font-medium text-slate-500 border-r border-slate-200 text-center">{apt.id.split('-').pop()?.substring(0, 4)}</td>
                           <td className="px-8 py-5 text-sm font-bold text-slate-800 border-r border-slate-200">{apt.patientName}</td>
@@ -499,9 +538,87 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
         )}
       </div>
 
+      {/* Appointment Detail Popup - Design refined with moved elements */}
+      {isDetailModalOpen && selectedAppointment && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 animate-in fade-in duration-200">
+           <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm" onClick={() => setIsDetailModalOpen(false)} />
+           <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden relative z-10 animate-in zoom-in-95 duration-300">
+              {/* Actions Bar */}
+              <div className="flex items-center justify-end gap-3 p-5">
+                 <button onClick={(e) => handleEditClick(e, selectedAppointment)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-full transition-all"><Pencil size={20} /></button>
+                 <button onClick={(e) => handleDeleteClick(e, selectedAppointment.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"><Trash2 size={20} /></button>
+                 <button className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-full transition-all"><Mail size={20} /></button>
+                 <button className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-full transition-all"><MoreHorizontal size={20} /></button>
+                 <button onClick={() => setIsDetailModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-full transition-all ml-2"><X size={20} /></button>
+              </div>
+
+              <div className="px-8 pb-10 space-y-8">
+                 {/* Title & Time Section */}
+                 <div className="flex gap-6">
+                    <div className="w-4 h-4 rounded-[4px] bg-[#d9e63d] mt-2 shrink-0 shadow-sm" />
+                    <div className="space-y-1">
+                       <h2 className="text-2xl font-black text-slate-800 tracking-tight leading-tight">{selectedAppointment.patientName} - {selectedAppointment.reason}</h2>
+                       <p className="text-sm font-semibold text-slate-500">{formatFullDateDisplay(selectedAppointment.date)}  •  {selectedAppointment.startTime} – {selectedAppointment.endTime}</p>
+                    </div>
+                 </div>
+
+                 {/* Provider Section - MOVED TO TOP */}
+                 <div className="flex gap-6 items-start">
+                    <CalendarIcon size={20} className="text-slate-400 mt-0.5 shrink-0" />
+                    <div className="flex items-center gap-2">
+                       <div className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 text-[10px] font-black border border-emerald-100 shadow-sm">D</div>
+                       <p className="text-sm font-bold text-slate-800">Dr. Lily Cooper's Calendar</p>
+                    </div>
+                 </div>
+
+                 {/* Updated Status Row (Replacing Location) */}
+                 <div className="flex gap-6 items-start">
+                    {(() => {
+                       const statusInfo = getStatusDetail(selectedAppointment.status);
+                       const StatusIcon = statusInfo.icon;
+                       return (
+                          <>
+                             <StatusIcon size={20} className="text-slate-400 mt-0.5 shrink-0" />
+                             <div className="min-w-0 flex-1">
+                                <p className={`text-sm font-semibold ${statusInfo.color} transition-colors`}>
+                                   {statusInfo.text}
+                                </p>
+                             </div>
+                          </>
+                       );
+                    })()}
+                 </div>
+
+                 {/* Description Section */}
+                 <div className="flex gap-6 items-start">
+                    <AlignLeft size={20} className="text-slate-400 mt-1 shrink-0" />
+                    <div className="space-y-4">
+                       <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                          Initial screening and clinical review. Please ensure the patient's record is up to date and all previous lab results are accessible.
+                       </p>
+                       <p className="text-sm text-slate-600 font-medium italic">
+                          "Providing world-class healthcare for every patient."
+                       </p>
+                    </div>
+                 </div>
+
+                 {/* Notifications Section */}
+                 <div className="flex gap-6 items-start">
+                    <Bell size={20} className="text-slate-400 mt-0.5 shrink-0" />
+                    <div className="space-y-1.5">
+                       <p className="text-sm text-slate-600 font-bold">15 minutes before</p>
+                       <p className="text-sm text-slate-600 font-bold">1 hour before</p>
+                       <p className="text-sm text-slate-600 font-bold">1 day before</p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+      )}
+
       {/* Edit Modal - Strictly following the screenshot design */}
       {isEditModalOpen && editingAppointment && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[130] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onClick={() => setIsEditModalOpen(false)} />
           <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg animate-in zoom-in slide-in-from-bottom-4 relative z-10 p-10">
             <h2 className="text-3xl font-bold text-[#1e293b] mb-10">{t('editappointment')}</h2>
