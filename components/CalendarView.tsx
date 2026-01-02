@@ -417,8 +417,8 @@ export const CalendarView: React.FC<Props> = ({ appointments, onUpdateAppointmen
       {/* Top Toolbar */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
         <div className="flex bg-slate-100 p-1 rounded-xl">
-          <button onClick={() => setViewType('list')} className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${viewType === 'list' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}><List size={18} /> List</button>
           <button onClick={() => setViewType('calendar')} className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${viewType === 'calendar' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}><CalendarIcon size={18} /> Calendar</button>
+          <button onClick={() => setViewType('list')} className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all ${viewType === 'list' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}><List size={18} /> List</button>
         </div>
 
         {viewType === 'calendar' && (

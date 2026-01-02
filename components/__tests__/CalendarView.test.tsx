@@ -20,7 +20,11 @@ describe('CalendarView', () => {
       />
     );
 
-    // List view is default, find Tony Hack and open edit
+    // Switch to List view first as Calendar is now default
+    const listToggle = screen.getByRole('button', { name: /List/i });
+    fireEvent.click(listToggle);
+    
+    // Find Tony Hack and open edit
     const moreBtn = screen.getAllByRole('button').find(b => b.querySelector('.lucide-more-horizontal'));
     if (moreBtn) fireEvent.click(moreBtn);
     
@@ -40,18 +44,24 @@ describe('CalendarView', () => {
   it('switches between List and Calendar views', () => {
     render(<CalendarView appointments={MOCK_APPOINTMENTS} onUpdateAppointment={mockUpdate} onDeleteAppointment={mockDelete} onAddAppointment={mockAdd} language="EN" />);
     
-    const calendarToggle = screen.getByRole('button', { name: /Calendar/i });
-    fireEvent.click(calendarToggle);
-    expect(screen.getByText(/GMT \+7/i)).toBeInTheDocument();
-    
+    // Test switch to List (Calendar is already default)
     const listToggle = screen.getByRole('button', { name: /List/i });
     fireEvent.click(listToggle);
     expect(screen.getByText(/Patient Name/i)).toBeInTheDocument();
+
+    // Switch back to Calendar
+    const calendarToggle = screen.getByRole('button', { name: /Calendar/i });
+    fireEvent.click(calendarToggle);
+    expect(screen.getByText(/GMT \+7/i)).toBeInTheDocument();
   });
 
   it('filters appointments by status', () => {
     render(<CalendarView appointments={MOCK_APPOINTMENTS} onUpdateAppointment={mockUpdate} onDeleteAppointment={mockDelete} onAddAppointment={mockAdd} language="EN" />);
     
+    // Switch to List view to easily verify filtering in table
+    const listToggle = screen.getByRole('button', { name: /List/i });
+    fireEvent.click(listToggle);
+
     // Open filter
     fireEvent.click(screen.getAllByRole('button')[2]); // SlidersHorizontal icon
     
@@ -59,8 +69,6 @@ describe('CalendarView', () => {
     fireEvent.click(screen.getByText('Canceled'));
     
     // Check if only canceled appointments are shown
-    const rows = screen.getAllByRole('row');
-    // Header + data rows. MOCK_APPOINTMENTS has a few canceled items.
     expect(screen.getAllByText(/Canceled/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Scheduled/i)).not.toBeInTheDocument();
   });
